@@ -7,5 +7,5 @@
 - SEDA NAZ DOLU
 
 ### Links
-https://trello.com/b/T1hWhjcW/my-trello-board
-https://drive.google.com/drive/u/1/folders/1Pvr2UFskZBgf40dmGCuVJ8EUV1LZSOXW
+- https://trello.com/b/T1hWhjcW/my-trello-board
+- https://drive.google.com/drive/u/1/folders/1Pvr2UFskZBgf40dmGCuVJ8EUV1LZSOXW
