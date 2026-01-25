@@ -1,0 +1,96 @@
+{
+  "topics": [
+    {
+      "name": "Arithmetic",
+      "slug": "arithmetic",
+      "description": "Basic arithmetic operations: addition, subtraction, multiplication, division",
+      "grade_range_start": 1,
+      "grade_range_end": 6,
+      "display_order": 1,
+      "subtopics": [
+        {"name": "Addition", "slug": "addition", "difficulty_base": 20, "display_order": 1},
+        {"name": "Subtraction", "slug": "subtraction", "difficulty_base": 25, "display_order": 2},
+        {"name": "Multiplication", "slug": "multiplication", "difficulty_base": 40, "display_order": 3},
+        {"name": "Division", "slug": "division", "difficulty_base": 50, "display_order": 4},
+        {"name": "Mixed Operations", "slug": "mixed", "difficulty_base": 60, "display_order": 5}
+      ]
+    },
+    {
+      "name": "Fractions",
+      "slug": "fractions",
+      "description": "Operations with fractions: addition, subtraction, multiplication, division",
+      "grade_range_start": 3,
+      "grade_range_end": 8,
+      "display_order": 2,
+      "subtopics": [
+        {"name": "Adding Fractions", "slug": "addition", "difficulty_base": 40, "display_order": 1},
+        {"name": "Subtracting Fractions", "slug": "subtraction", "difficulty_base": 45, "display_order": 2},
+        {"name": "Multiplying Fractions", "slug": "multiplication", "difficulty_base": 50, "display_order": 3},
+        {"name": "Dividing Fractions", "slug": "division", "difficulty_base": 55, "display_order": 4}
+      ]
+    },
+    {
+      "name": "Percentages",
+      "slug": "percentages",
+      "description": "Working with percentages: finding percentages, finding whole, percentage change",
+      "grade_range_start": 5,
+      "grade_range_end": 9,
+      "display_order": 3,
+      "subtopics": [
+        {"name": "Finding Percentage", "slug": "find_percentage", "difficulty_base": 35, "display_order": 1},
+        {"name": "Finding the Whole", "slug": "find_whole", "difficulty_base": 45, "display_order": 2},
+        {"name": "Finding What Percent", "slug": "find_percent", "difficulty_base": 50, "display_order": 3},
+        {"name": "Percentage Change", "slug": "percentage_change", "difficulty_base": 55, "display_order": 4},
+        {"name": "Discounts", "slug": "discount", "difficulty_base": 50, "display_order": 5},
+        {"name": "Tax Calculations", "slug": "tax", "difficulty_base": 50, "display_order": 6}
+      ]
+    },
+    {
+      "name": "Algebra",
+      "slug": "algebra",
+      "description": "Algebraic equations and expressions",
+      "grade_range_start": 6,
+      "grade_range_end": 12,
+      "display_order": 4,
+      "subtopics": [
+        {"name": "One-Step Equations", "slug": "one_step", "difficulty_base": 30, "display_order": 1},
+        {"name": "Two-Step Equations", "slug": "two_step", "difficulty_base": 45, "display_order": 2},
+        {"name": "Multi-Step Equations", "slug": "multi_step", "difficulty_base": 60, "display_order": 3},
+        {"name": "Variables on Both Sides", "slug": "both_sides", "difficulty_base": 70, "display_order": 4},
+        {"name": "Quadratic Equations", "slug": "quadratic", "difficulty_base": 80, "display_order": 5}
+      ]
+    },
+    {
+      "name": "Geometry",
+      "slug": "geometry",
+      "description": "Geometric calculations: area, perimeter, volume, Pythagorean theorem",
+      "grade_range_start": 3,
+      "grade_range_end": 12,
+      "display_order": 5,
+      "subtopics": [
+        {"name": "Perimeter", "slug": "perimeter", "difficulty_base": 25, "display_order": 1},
+        {"name": "Area of 2D Shapes", "slug": "area", "difficulty_base": 35, "display_order": 2},
+        {"name": "Circumference", "slug": "circumference", "difficulty_base": 45, "display_order": 3},
+        {"name": "Volume", "slug": "volume", "difficulty_base": 50, "display_order": 4},
+        {"name": "Surface Area", "slug": "surface_area", "difficulty_base": 60, "display_order": 5},
+        {"name": "Pythagorean Theorem", "slug": "pythagorean", "difficulty_base": 55, "display_order": 6}
+      ]
+    },
+    {
+      "name": "Ratios",
+      "slug": "ratios",
+      "description": "Ratios and proportions",
+      "grade_range_start": 5,
+      "grade_range_end": 9,
+      "display_order": 6,
+      "subtopics": [
+        {"name": "Simplifying Ratios", "slug": "simplify", "difficulty_base": 30, "display_order": 1},
+        {"name": "Equivalent Ratios", "slug": "equivalent", "difficulty_base": 40, "display_order": 2},
+        {"name": "Solving Proportions", "slug": "solve_proportion", "difficulty_base": 50, "display_order": 3},
+        {"name": "Ratio Word Problems", "slug": "word_problem", "difficulty_base": 55, "display_order": 4},
+        {"name": "Part-to-Whole", "slug": "part_to_whole", "difficulty_base": 60, "display_order": 5},
+        {"name": "Scale Problems", "slug": "scale", "difficulty_base": 60, "display_order": 6}
+      ]
+    }
+  ]
+}
