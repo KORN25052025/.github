@@ -10,12 +10,12 @@ from ...database import get_db
 from ...models import Topic, Mastery
 from ...schemas import MasteryResponse, TopicMasteryResponse, StatisticsResponse
 
-from adaptation.mastery_tracker import MasteryTracker
+from adaptation.bkt_tracker import BKTTracker
 
 router = APIRouter()
 
-# In-memory mastery tracker
-mastery_tracker = MasteryTracker()
+# BKT-based mastery tracker (Bayesian Knowledge Tracing)
+mastery_tracker = BKTTracker()
 
 
 @router.get("/progress/mastery", response_model=List[MasteryResponse])
@@ -30,8 +30,8 @@ async def get_all_mastery(db: Session = Depends(get_db)):
         result.append(MasteryResponse(
             topic_id=topic.id,
             topic_name=topic.name,
-            mastery_score=record.mastery_score,
-            level=record.level.value,
+            mastery_score=record.mastery,  # BKT uses 'mastery' instead of 'mastery_score'
+            level=record.difficulty_tier.name,  # BKT uses 'difficulty_tier' instead of 'level'
             attempts=record.attempts,
             correct=record.correct,
             accuracy=record.accuracy,
@@ -62,8 +62,8 @@ async def get_topic_mastery(
     return MasteryResponse(
         topic_id=topic.id,
         topic_name=topic.name,
-        mastery_score=record.mastery_score,
-        level=record.level.value,
+        mastery_score=record.mastery,  # BKT uses 'mastery' instead of 'mastery_score'
+        level=record.difficulty_tier.name,  # BKT uses 'difficulty_tier' instead of 'level'
         attempts=record.attempts,
         correct=record.correct,
         accuracy=record.accuracy,
@@ -83,8 +83,8 @@ async def get_statistics(db: Session = Depends(get_db)):
     total_correct = sum(r.correct for r in records.values())
     overall_accuracy = total_correct / total_attempts if total_attempts > 0 else 0.0
 
-    # Average mastery
-    mastery_scores = [r.mastery_score for r in records.values()]
+    # Average mastery (BKT uses 'mastery' property)
+    mastery_scores = [r.mastery for r in records.values()]
     avg_mastery = sum(mastery_scores) / len(mastery_scores) if mastery_scores else 0.5
 
     # Best streak across all topics

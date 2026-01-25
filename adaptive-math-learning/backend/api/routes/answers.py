@@ -9,15 +9,15 @@ from typing import Dict, Any
 from ...database import get_db
 from ...schemas import AnswerRequest, AnswerResponse
 
-from adaptation.mastery_tracker import MasteryTracker
+from adaptation.bkt_tracker import BKTTracker
 
 router = APIRouter()
 
 # In-memory storage for questions (temporary; would use DB in production)
 _question_cache: Dict[str, Dict[str, Any]] = {}
 
-# Mastery tracker
-mastery_tracker = MasteryTracker()
+# BKT-based mastery tracker (Bayesian Knowledge Tracing)
+mastery_tracker = BKTTracker()
 
 
 def store_question(question_id: str, data: Dict[str, Any]):

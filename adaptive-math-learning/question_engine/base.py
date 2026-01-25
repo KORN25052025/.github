@@ -99,19 +99,17 @@ class QuestionTemplate:
 class GeneratedQuestion:
     """A fully generated question with all components."""
 
-    # Identifiers
+    # Identifiers (required)
     question_id: str
     template_id: str
     question_type: QuestionType
-    operation: Optional[OperationType]
-
-    # The mathematical content
     expression: str  # Human-readable expression, e.g., "15 + 8 = ?"
-    expression_latex: Optional[str] = None  # LaTeX format for rendering
-
-    # Answer information
     correct_answer: Any
     answer_format: AnswerFormat
+
+    # Optional fields with defaults
+    operation: Optional[OperationType] = None
+    expression_latex: Optional[str] = None  # LaTeX format for rendering
 
     # Multiple choice options (if applicable)
     distractors: List[Any] = field(default_factory=list)

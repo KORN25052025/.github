@@ -10,7 +10,7 @@ import uuid
 
 from question_engine.base import QuestionType, OperationType, GeneratedQuestion
 from question_engine.registry import registry
-from adaptation.mastery_tracker import MasteryTracker
+from adaptation.bkt_tracker import BKTTracker
 from adaptation.difficulty_mapper import DifficultyMapper, difficulty_mapper
 
 
@@ -40,7 +40,7 @@ class QuestionService:
     def __init__(self, db=None, config: Optional[QuestionServiceConfig] = None):
         self.db = db
         self.config = config or QuestionServiceConfig()
-        self.mastery_tracker = MasteryTracker()
+        self.mastery_tracker = BKTTracker()
         self.difficulty_mapper = difficulty_mapper
 
     def generate_question(
@@ -236,11 +236,11 @@ class SessionService:
 
 
 class MasteryService:
-    """Service for mastery tracking operations."""
+    """Service for mastery tracking operations using BKT algorithm."""
 
     def __init__(self, db=None):
         self.db = db
-        self.tracker = MasteryTracker()
+        self.tracker = BKTTracker()
 
     def get_all_mastery(self) -> Dict[str, Any]:
         """Get mastery for all topics."""
@@ -251,8 +251,8 @@ class MasteryService:
         record = self.tracker.get_record(topic)
         return {
             "topic": topic,
-            "mastery_score": record.mastery_score,
-            "level": record.level.value,
+            "mastery_score": record.mastery,  # BKT uses 'mastery'
+            "level": record.difficulty_tier.name,  # BKT uses 'difficulty_tier'
             "attempts": record.attempts,
             "correct": record.correct,
             "accuracy": record.accuracy,

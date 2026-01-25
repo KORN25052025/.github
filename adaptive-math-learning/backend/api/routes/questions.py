@@ -13,12 +13,12 @@ from ...schemas import QuestionRequest, QuestionResponse
 
 from question_engine.base import QuestionType, OperationType
 from question_engine.registry import registry
-from adaptation.mastery_tracker import MasteryTracker
+from adaptation.bkt_tracker import BKTTracker
 
 router = APIRouter()
 
-# In-memory mastery tracker (would be replaced with DB-backed in production)
-mastery_tracker = MasteryTracker()
+# BKT-based mastery tracker (Bayesian Knowledge Tracing)
+mastery_tracker = BKTTracker()
 
 
 @router.post("/questions/generate", response_model=QuestionResponse)

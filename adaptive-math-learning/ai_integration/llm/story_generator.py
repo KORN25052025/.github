@@ -1,8 +1,11 @@
 """
-Story Generation using LLM.
+Turkish Story Generation using Anthropic Claude API.
 
-Transforms abstract mathematical expressions into engaging word problems
+Transforms abstract mathematical expressions into engaging Turkish word problems
 while preserving mathematical correctness.
+
+Primary LLM: Claude 3.5 Sonnet (Anthropic)
+Fallback: Template-based generation
 """
 
 from dataclasses import dataclass
@@ -12,15 +15,16 @@ import random
 
 
 class StoryTheme(str, Enum):
-    """Themes for story generation."""
-    SHOPPING = "shopping"
-    SPORTS = "sports"
-    COOKING = "cooking"
-    TRAVEL = "travel"
-    NATURE = "nature"
-    ANIMALS = "animals"
-    GAMES = "games"
-    SCHOOL = "school"
+    """Themes for Turkish story generation."""
+    ALISVERIS = "alisveris"        # Shopping
+    SPOR = "spor"                   # Sports
+    YEMEK = "yemek"                 # Cooking/Food
+    SEYAHAT = "seyahat"            # Travel
+    DOGA = "doga"                   # Nature
+    HAYVANLAR = "hayvanlar"        # Animals
+    OYUNLAR = "oyunlar"            # Games
+    OKUL = "okul"                   # School
+    GUNLUK_HAYAT = "gunluk_hayat"  # Daily life
 
 
 @dataclass
@@ -29,7 +33,7 @@ class StoryContext:
     theme: StoryTheme
     character_name: Optional[str] = None
     grade_level: int = 5
-    language: str = "en"
+    language: str = "tr"  # Turkish by default
 
 
 @dataclass
@@ -37,54 +41,66 @@ class GeneratedStory:
     """Result of story generation."""
     story_text: str
     visual_prompt: Optional[str] = None
-    theme_used: StoryTheme = StoryTheme.SHOPPING
+    theme_used: StoryTheme = StoryTheme.GUNLUK_HAYAT
     success: bool = True
     error_message: Optional[str] = None
 
 
-# Character name pools
-NAMES = [
-    "Emma", "Liam", "Olivia", "Noah", "Ava", "Ethan",
-    "Sophia", "Mason", "Isabella", "James", "Mia", "Lucas",
+# Turkish character name pools
+TURKISH_NAMES = [
+    "Ali", "Ayse", "Mehmet", "Fatma", "Ahmet", "Zeynep",
+    "Mustafa", "Elif", "Emre", "Selin", "Burak", "Deniz",
+    "Cem", "Ece", "Kerem", "Defne", "Mert", "Yagmur",
 ]
 
 
 class StoryGenerator:
     """
-    Transforms abstract math expressions into engaging word problems.
+    Transforms abstract math expressions into engaging Turkish word problems.
 
-    Uses OpenAI GPT for story generation with fallback to templates.
+    Uses Anthropic Claude API for story generation with fallback to templates.
     """
 
-    STORY_PROMPT = """You are creating an engaging math word problem for a grade {grade_level} student.
+    TURKISH_STORY_PROMPT = """Sen {grade_level}. sinif ogrencisi icin Turkce matematik problemi olusturuyorsun.
 
-Transform this mathematical expression into a fun story problem:
+Bu matematiksel ifadeyi eglenceli bir hikaye problemine donustur:
 
-EXPRESSION: {expression}
-CORRECT ANSWER: {answer}
-THEME: {theme}
-CHARACTER: {character}
+IFADE: {expression}
+DOGRU CEVAP: {answer}
+TEMA: {theme}
+KARAKTER: {character}
 
-Requirements:
-1. The story must be age-appropriate and engaging
-2. All numbers MUST match the original expression EXACTLY
-3. The question must be clear and answerable
-4. Use vocabulary appropriate for grade {grade_level}
-5. Keep the story to 2-3 sentences maximum
-6. Do NOT reveal the answer in the story
-7. End with a clear question
+Gereksinimler:
+1. Hikaye yasa uygun ve ilgi cekici olmali
+2. Tum sayilar orijinal ifadeyle AYNI olmali
+3. Soru acik ve cevaplanabilir olmali
+4. {grade_level}. sinif icin uygun kelime hazinesi kullan
+5. Hikaye 2-3 cumle ile sinirli olsun
+6. Cevabi hikayede verme
+7. Net bir soru ile bitir
 
-Respond with ONLY the story problem, nothing else."""
+Sadece hikaye problemini yaz, baska bir sey yazma."""
 
-    def __init__(self, api_key: Optional[str] = None):
-        """Initialize story generator."""
+    def __init__(self, api_key: Optional[str] = None, provider: str = "claude"):
+        """
+        Initialize story generator.
+
+        Args:
+            api_key: API key (Anthropic or OpenAI based on provider)
+            provider: LLM provider to use ("claude" or "openai")
+        """
         self.api_key = api_key
+        self.provider = provider
         self._client = None
 
         if api_key:
             try:
-                from openai import OpenAI
-                self._client = OpenAI(api_key=api_key)
+                if provider == "claude":
+                    from .providers.claude_provider import ClaudeProvider
+                    self._client = ClaudeProvider(api_key=api_key)
+                else:
+                    from .providers.openai_provider import OpenAIProvider
+                    self._client = OpenAIProvider(api_key=api_key)
             except ImportError:
                 pass
 
@@ -95,7 +111,7 @@ Respond with ONLY the story problem, nothing else."""
         context: Optional[StoryContext] = None
     ) -> GeneratedStory:
         """
-        Generate a story problem from a mathematical expression.
+        Generate a Turkish story problem from a mathematical expression.
 
         Args:
             expression: The math expression (e.g., "15 + 8 = ?")
@@ -103,18 +119,19 @@ Respond with ONLY the story problem, nothing else."""
             context: Optional story context
 
         Returns:
-            GeneratedStory with the word problem
+            GeneratedStory with the Turkish word problem
         """
         context = context or StoryContext(
             theme=random.choice(list(StoryTheme)),
-            character_name=random.choice(NAMES),
+            character_name=random.choice(TURKISH_NAMES),
             grade_level=5,
+            language="tr",
         )
 
-        # Try OpenAI if available
-        if self._client:
+        # Try LLM if available
+        if self._client and self._client.is_available():
             try:
-                return await self._generate_with_openai(expression, answer, context)
+                return await self._generate_with_llm(expression, answer, context)
             except Exception as e:
                 # Fall back to templates
                 return self._generate_from_template(expression, answer, context, str(e))
@@ -122,45 +139,57 @@ Respond with ONLY the story problem, nothing else."""
         # Use templates if no API key
         return self._generate_from_template(expression, answer, context)
 
-    async def _generate_with_openai(
+    async def _generate_with_llm(
         self,
         expression: str,
         answer: any,
         context: StoryContext
     ) -> GeneratedStory:
-        """Generate story using OpenAI API."""
-        prompt = self.STORY_PROMPT.format(
+        """Generate story using Claude or OpenAI API."""
+        prompt = self.TURKISH_STORY_PROMPT.format(
             grade_level=context.grade_level,
             expression=expression,
             answer=answer,
             theme=context.theme.value,
-            character=context.character_name or random.choice(NAMES),
+            character=context.character_name or random.choice(TURKISH_NAMES),
         )
 
-        response = self._client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful math education assistant that creates engaging word problems."
-                },
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=200,
+        system_prompt = "Sen K-12 ogrencileri icin Turkce matematik kelime problemleri olusturan bir egitim asistanisin."
+
+        story_text = await self._client.generate(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            max_tokens=300,
             temperature=0.7,
         )
 
-        story_text = response.choices[0].message.content.strip()
-
-        # Generate visual prompt
-        visual_prompt = f"A colorful illustration of {context.character_name} in a {context.theme.value} scene"
+        # Generate visual prompt for DALL-E 3
+        visual_prompt = self._generate_visual_prompt(context)
 
         return GeneratedStory(
-            story_text=story_text,
+            story_text=story_text.strip(),
             visual_prompt=visual_prompt,
             theme_used=context.theme,
             success=True,
         )
+
+    def _generate_visual_prompt(self, context: StoryContext) -> str:
+        """Generate DALL-E 3 visual prompt."""
+        theme_descriptions = {
+            StoryTheme.ALISVERIS: "a colorful Turkish market scene with fruits and vegetables",
+            StoryTheme.SPOR: "children playing sports in a sunny Turkish school yard",
+            StoryTheme.YEMEK: "a warm Turkish kitchen with traditional food",
+            StoryTheme.SEYAHAT: "a scenic Turkish landscape with a bus or train",
+            StoryTheme.DOGA: "beautiful Turkish nature with flowers and trees",
+            StoryTheme.HAYVANLAR: "cute farm animals in a Turkish countryside",
+            StoryTheme.OYUNLAR: "children playing traditional Turkish games",
+            StoryTheme.OKUL: "a bright and cheerful Turkish classroom",
+            StoryTheme.GUNLUK_HAYAT: "a typical day in a Turkish neighborhood",
+        }
+
+        theme_desc = theme_descriptions.get(context.theme, "a friendly educational scene")
+
+        return f"A colorful, child-friendly educational illustration showing {theme_desc}. The style should be warm, inviting, and suitable for grade {context.grade_level} students. No text in the image."
 
     def _generate_from_template(
         self,
@@ -169,8 +198,8 @@ Respond with ONLY the story problem, nothing else."""
         context: StoryContext,
         error: Optional[str] = None
     ) -> GeneratedStory:
-        """Generate story using templates (fallback)."""
-        name = context.character_name or random.choice(NAMES)
+        """Generate Turkish story using templates (fallback)."""
+        name = context.character_name or random.choice(TURKISH_NAMES)
         theme = context.theme
 
         # Parse expression to get operation and operands
@@ -178,14 +207,14 @@ Respond with ONLY the story problem, nothing else."""
 
         return GeneratedStory(
             story_text=story,
-            visual_prompt=None,
+            visual_prompt=self._generate_visual_prompt(context),
             theme_used=theme,
             success=error is None,
             error_message=error,
         )
 
     def _template_story(self, expression: str, name: str, theme: StoryTheme) -> str:
-        """Generate story from template based on operation."""
+        """Generate Turkish story from template based on operation."""
         # Simple parsing
         expr = expression.replace("= ?", "").strip()
 
@@ -199,66 +228,70 @@ Respond with ONLY the story problem, nothing else."""
             a, b = parts[0].strip(), parts[1].strip()
             return self._subtraction_story(a, b, name, theme)
 
-        elif "×" in expr or "*" in expr:
-            parts = expr.replace("×", "*").split("*")
+        elif "x" in expr.lower() or "*" in expr:
+            parts = expr.replace("x", "*").replace("X", "*").split("*")
             a, b = parts[0].strip(), parts[1].strip()
             return self._multiplication_story(a, b, name, theme)
 
-        elif "÷" in expr or "/" in expr:
-            parts = expr.replace("÷", "/").split("/")
+        elif "/" in expr or ":" in expr:
+            parts = expr.replace(":", "/").split("/")
             a, b = parts[0].strip(), parts[1].strip()
             return self._division_story(a, b, name, theme)
 
         # Fallback
-        return f"Solve this problem: {expression}"
+        return f"Bu problemi coz: {expression}"
 
     def _addition_story(self, a: str, b: str, name: str, theme: StoryTheme) -> str:
-        """Generate addition story."""
+        """Generate Turkish addition story."""
         templates = {
-            StoryTheme.SHOPPING: f"{name} bought {a} apples and then bought {b} more. How many apples does {name} have now?",
-            StoryTheme.SPORTS: f"{name} scored {a} points in the first half and {b} points in the second half. What is the total score?",
-            StoryTheme.COOKING: f"{name} has {a} cookies and bakes {b} more. How many cookies does {name} have in total?",
-            StoryTheme.ANIMALS: f"There are {a} birds on a tree. {b} more birds fly in. How many birds are on the tree now?",
-            StoryTheme.GAMES: f"{name} collected {a} coins in level 1 and {b} coins in level 2. How many coins did {name} collect in total?",
-            StoryTheme.SCHOOL: f"{name} read {a} pages yesterday and {b} pages today. How many pages did {name} read altogether?",
+            StoryTheme.ALISVERIS: f"{name} marketten {a} elma aldi, sonra {b} elma daha aldi. {name}'in toplam kac elmasi var?",
+            StoryTheme.SPOR: f"{name} ilk yarisinda {a} sayi yapti, ikinci yarisinda {b} sayi daha yapti. Toplam kac sayi yapti?",
+            StoryTheme.YEMEK: f"{name}'in {a} kurabiyesi vardi, {b} tane daha pisirdi. Simdi toplam kac kurabiyesi var?",
+            StoryTheme.HAYVANLAR: f"Agacta {a} kus vardi. {b} kus daha geldi. Simdi agacta kac kus var?",
+            StoryTheme.OYUNLAR: f"{name} birinci bolumde {a} puan topladi, ikinci bolumde {b} puan daha topladi. Toplam kac puan topladi?",
+            StoryTheme.OKUL: f"{name} dun {a} sayfa okudu, bugun {b} sayfa daha okudu. Toplam kac sayfa okudu?",
+            StoryTheme.GUNLUK_HAYAT: f"{name}'in {a} tane kalem var. Annesi {b} kalem daha aldi. Simdi toplam kac kalemi var?",
         }
-        return templates.get(theme, templates[StoryTheme.SHOPPING])
+        return templates.get(theme, templates[StoryTheme.GUNLUK_HAYAT])
 
     def _subtraction_story(self, a: str, b: str, name: str, theme: StoryTheme) -> str:
-        """Generate subtraction story."""
+        """Generate Turkish subtraction story."""
         templates = {
-            StoryTheme.SHOPPING: f"{name} had {a} dollars and spent {b} dollars on a toy. How much money does {name} have left?",
-            StoryTheme.SPORTS: f"Team A scored {a} points and Team B scored {b} points. By how many points did Team A win?",
-            StoryTheme.COOKING: f"{name} made {a} cupcakes and gave away {b} to friends. How many cupcakes does {name} have left?",
-            StoryTheme.ANIMALS: f"There were {a} fish in the pond. {b} fish swam away. How many fish are left in the pond?",
-            StoryTheme.GAMES: f"{name} had {a} lives in the game but lost {b}. How many lives does {name} have left?",
-            StoryTheme.SCHOOL: f"{name} had {a} stickers and gave {b} to a friend. How many stickers does {name} have now?",
+            StoryTheme.ALISVERIS: f"{name}'in {a} lirasi vardi, {b} lira harcadi. Kac lirasi kaldi?",
+            StoryTheme.SPOR: f"A takimi {a} gol atti, B takimi {b} gol atti. A takimi kac gol farkla kazandi?",
+            StoryTheme.YEMEK: f"{name} {a} tane borek yapti, {b} tanesini arkadaslarina verdi. Kac borek kaldi?",
+            StoryTheme.HAYVANLAR: f"Havuzda {a} balik vardi. {b} balik yuzup gitti. Havuzda kac balik kaldi?",
+            StoryTheme.OYUNLAR: f"{name}'in oyunda {a} cani vardi, {b} can kaybetti. Kac cani kaldi?",
+            StoryTheme.OKUL: f"{name}'in {a} cikartmasi vardi, arkadasina {b} tane verdi. Kac cikartmasi kaldi?",
+            StoryTheme.GUNLUK_HAYAT: f"Kutuda {a} top vardi. {b} tanesi kayboldu. Kutuda kac top kaldi?",
         }
-        return templates.get(theme, templates[StoryTheme.SHOPPING])
+        return templates.get(theme, templates[StoryTheme.GUNLUK_HAYAT])
 
     def _multiplication_story(self, a: str, b: str, name: str, theme: StoryTheme) -> str:
-        """Generate multiplication story."""
+        """Generate Turkish multiplication story."""
         templates = {
-            StoryTheme.SHOPPING: f"{name} bought {a} packs of pencils. Each pack has {b} pencils. How many pencils did {name} buy in total?",
-            StoryTheme.SPORTS: f"There are {a} teams. Each team has {b} players. How many players are there in total?",
-            StoryTheme.COOKING: f"{name} is making {a} batches of cookies. Each batch makes {b} cookies. How many cookies will there be?",
-            StoryTheme.ANIMALS: f"There are {a} bird nests. Each nest has {b} eggs. How many eggs are there altogether?",
-            StoryTheme.GAMES: f"{name} completed {a} levels. Each level gives {b} stars. How many stars did {name} earn?",
-            StoryTheme.SCHOOL: f"There are {a} rows of desks. Each row has {b} desks. How many desks are there in the classroom?",
+            StoryTheme.ALISVERIS: f"{name} {a} paket kalem aldi. Her pakette {b} kalem var. Toplam kac kalem aldi?",
+            StoryTheme.SPOR: f"{a} takim var. Her takimda {b} oyuncu var. Toplam kac oyuncu var?",
+            StoryTheme.YEMEK: f"{name} {a} tepsi kurabiye yapti. Her tepside {b} kurabiye var. Toplam kac kurabiye var?",
+            StoryTheme.HAYVANLAR: f"{a} kus yuvasi var. Her yuvada {b} yumurta var. Toplam kac yumurta var?",
+            StoryTheme.OYUNLAR: f"{name} {a} bolum tamamladi. Her bolum {b} yildiz veriyor. Toplam kac yildiz kazandi?",
+            StoryTheme.OKUL: f"Sinifta {a} sira var. Her sirada {b} ogrenci oturuyor. Sinifta toplam kac ogrenci var?",
+            StoryTheme.GUNLUK_HAYAT: f"{name}'in {a} arkadasi var. Her arkadasina {b} sekerleme verdi. Toplam kac sekerleme verdi?",
         }
-        return templates.get(theme, templates[StoryTheme.SHOPPING])
+        return templates.get(theme, templates[StoryTheme.GUNLUK_HAYAT])
 
     def _division_story(self, a: str, b: str, name: str, theme: StoryTheme) -> str:
-        """Generate division story."""
+        """Generate Turkish division story."""
         templates = {
-            StoryTheme.SHOPPING: f"{name} has {a} candies to share equally among {b} friends. How many candies will each friend get?",
-            StoryTheme.SPORTS: f"A coach has {a} jerseys to distribute equally among {b} teams. How many jerseys does each team get?",
-            StoryTheme.COOKING: f"{name} has {a} slices of pizza to share equally with {b} people. How many slices does each person get?",
-            StoryTheme.ANIMALS: f"A farmer has {a} carrots to feed {b} rabbits equally. How many carrots does each rabbit get?",
-            StoryTheme.GAMES: f"{name} wants to split {a} coins equally into {b} treasure chests. How many coins go in each chest?",
-            StoryTheme.SCHOOL: f"A teacher has {a} books to distribute equally to {b} students. How many books does each student get?",
+            StoryTheme.ALISVERIS: f"{name}'in {a} sekeri var. {b} arkadasina esit paylastirmak istiyor. Her arkadasa kac seker duser?",
+            StoryTheme.SPOR: f"Antrenor {a} formasi {b} takima esit dagitmak istiyor. Her takima kac forma duser?",
+            StoryTheme.YEMEK: f"{name}'in {a} dilim pizzasi var. {b} kisiyle esit paylasacak. Her kisiye kac dilim duser?",
+            StoryTheme.HAYVANLAR: f"Ciftci {a} havcucu {b} tavsana esit dagitacak. Her tavsana kac havuc duser?",
+            StoryTheme.OYUNLAR: f"{name} {a} altin madeni {b} sandiga esit dagitiyor. Her sandikta kac altin olur?",
+            StoryTheme.OKUL: f"Ogretmen {a} kitabi {b} ogrenciye esit dagitacak. Her ogrenciye kac kitap duser?",
+            StoryTheme.GUNLUK_HAYAT: f"{name}'in {a} bilye var. {b} torbaya esit dagitmak istiyor. Her torbaya kac bilye koyar?",
         }
-        return templates.get(theme, templates[StoryTheme.SHOPPING])
+        return templates.get(theme, templates[StoryTheme.GUNLUK_HAYAT])
 
 
 # Synchronous wrapper for non-async contexts
@@ -266,15 +299,25 @@ def generate_story_sync(
     expression: str,
     answer: any,
     api_key: Optional[str] = None,
-    theme: Optional[StoryTheme] = None
+    theme: Optional[StoryTheme] = None,
+    provider: str = "claude"
 ) -> GeneratedStory:
-    """Synchronous story generation."""
+    """Synchronous Turkish story generation."""
     import asyncio
+    import os
 
-    generator = StoryGenerator(api_key)
+    # Try to get API key from environment if not provided
+    if not api_key:
+        if provider == "claude":
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+        else:
+            api_key = os.getenv("OPENAI_API_KEY")
+
+    generator = StoryGenerator(api_key, provider=provider)
     context = StoryContext(
         theme=theme or random.choice(list(StoryTheme)),
-        character_name=random.choice(NAMES),
+        character_name=random.choice(TURKISH_NAMES),
+        language="tr",
     )
 
     # Run async function synchronously
