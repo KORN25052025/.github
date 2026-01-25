@@ -9,8 +9,8 @@ from pydantic import BaseModel
 
 from ...database import get_db
 from ...gamification.xp_system import XPSystem
-from ...gamification.badges import BadgeSystem, BadgeType
-from ...gamification.streaks import StreakManager
+from ...gamification.badges import BadgeSystem, BadgeCategory
+from ...gamification.streaks import StreakTracker
 from ...gamification.leaderboard import Leaderboard
 
 router = APIRouter(prefix="/gamification", tags=["Gamification"])
@@ -61,7 +61,7 @@ class XPAwardRequest(BaseModel):
 # Initialize systems
 xp_system = XPSystem()
 badge_system = BadgeSystem()
-streak_manager = StreakManager()
+streak_manager = StreakTracker()
 leaderboard = Leaderboard()
 
 
