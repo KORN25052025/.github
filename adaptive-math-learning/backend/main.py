@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .database import init_db
-from .api.routes import questions, answers, sessions, topics, progress
+from .api.routes import questions, answers, sessions, topics, progress, gamification
 
 settings = get_settings()
 
@@ -62,6 +62,7 @@ app.include_router(questions.router, prefix="/api/v1", tags=["Questions"])
 app.include_router(answers.router, prefix="/api/v1", tags=["Answers"])
 app.include_router(sessions.router, prefix="/api/v1", tags=["Sessions"])
 app.include_router(progress.router, prefix="/api/v1", tags=["Progress"])
+app.include_router(gamification.router, prefix="/api/v1", tags=["Gamification"])
 
 
 if __name__ == "__main__":
