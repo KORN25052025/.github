@@ -6,7 +6,7 @@ Implements UC-04 (Monitor Class) and UC-05 (Assign Practice) from specifications
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, desc
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -151,8 +151,10 @@ async def get_class_students(
 
     result = []
     for student in students:
-        # Get mastery data
-        masteries = db.query(Mastery).filter(Mastery.user_id == student.id).all()
+        # Get mastery data with eager loading for topic relationship
+        masteries = db.query(Mastery).options(
+            joinedload(Mastery.topic)
+        ).filter(Mastery.user_id == student.id).all()
 
         avg_mastery = sum(m.mastery_score for m in masteries) / len(masteries) if masteries else 0.0
 

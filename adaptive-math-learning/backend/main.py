@@ -21,9 +21,10 @@ app = FastAPI(
 )
 
 # CORS middleware for frontend
+# In production, set CORS_ORIGINS env var to restrict allowed origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development; restrict in production
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -63,6 +63,9 @@ def get_topics() -> List[Dict]:
     """Fetch available topics."""
     result = api_request("GET", "/topics")
     if result:
+        # API returns a list directly, not {"topics": [...]}
+        if isinstance(result, list):
+            return result
         return result.get("topics", [])
     # Fallback topics
     return [

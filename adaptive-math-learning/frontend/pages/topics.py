@@ -38,6 +38,9 @@ def get_topics() -> List[Dict]:
     """Fetch topics from API or return defaults."""
     result = api_request("GET", "/topics")
     if result:
+        # API returns a list directly, not {"topics": [...]}
+        if isinstance(result, list):
+            return result
         return result.get("topics", [])
 
     # Fallback to default topics

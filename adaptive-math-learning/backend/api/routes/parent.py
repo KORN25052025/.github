@@ -13,7 +13,7 @@ Features:
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, desc
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -120,8 +120,10 @@ async def get_child_overview(
     if not child:
         raise HTTPException(status_code=404, detail="Child not found")
 
-    # Get mastery data
-    masteries = db.query(Mastery).filter(Mastery.user_id == child_id).all()
+    # Get mastery data with eager loading for topic relationship
+    masteries = db.query(Mastery).options(
+        joinedload(Mastery.topic)
+    ).filter(Mastery.user_id == child_id).all()
     avg_mastery = sum(m.mastery_score for m in masteries) / len(masteries) if masteries else 0.0
     current_streak = max((m.current_streak for m in masteries), default=0)
     best_streak = max((m.best_streak for m in masteries), default=0)

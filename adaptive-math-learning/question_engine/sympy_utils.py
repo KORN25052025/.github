@@ -113,17 +113,73 @@ class SymbolicMath:
             except:
                 pass
 
-        # Fallback: simple evaluation
+        # Fallback: simple evaluation using safe AST parsing
         try:
+            import ast
+            import operator
+
             # Replace variable names with values
             eval_expr = expression
             for var, val in variables.items():
                 eval_expr = eval_expr.replace(var, str(val))
 
-            # Safe evaluation
+            # Safe evaluation using ast.parse
             eval_expr = eval_expr.replace('^', '**')
-            return eval(eval_expr, {"__builtins__": {}}, {"sqrt": math.sqrt, "pi": math.pi})
-        except:
+
+            # Define allowed operations
+            allowed_operators = {
+                ast.Add: operator.add,
+                ast.Sub: operator.sub,
+                ast.Mult: operator.mul,
+                ast.Div: operator.truediv,
+                ast.Pow: operator.pow,
+                ast.USub: operator.neg,
+                ast.UAdd: operator.pos,
+            }
+
+            allowed_functions = {
+                'sqrt': math.sqrt,
+                'pi': math.pi,
+                'abs': abs,
+            }
+
+            def safe_eval(node):
+                if isinstance(node, ast.Constant):
+                    return node.value
+                elif isinstance(node, ast.BinOp):
+                    left = safe_eval(node.left)
+                    right = safe_eval(node.right)
+                    op = allowed_operators.get(type(node.op))
+                    if op:
+                        return op(left, right)
+                    raise ValueError(f"Unsupported operator: {type(node.op)}")
+                elif isinstance(node, ast.UnaryOp):
+                    operand = safe_eval(node.operand)
+                    op = allowed_operators.get(type(node.op))
+                    if op:
+                        return op(operand)
+                    raise ValueError(f"Unsupported operator: {type(node.op)}")
+                elif isinstance(node, ast.Call):
+                    func_name = node.func.id if isinstance(node.func, ast.Name) else None
+                    if func_name in allowed_functions:
+                        func = allowed_functions[func_name]
+                        if callable(func):
+                            args = [safe_eval(arg) for arg in node.args]
+                            return func(*args)
+                        return func  # For constants like pi
+                    raise ValueError(f"Unsupported function: {func_name}")
+                elif isinstance(node, ast.Name):
+                    if node.id in allowed_functions:
+                        return allowed_functions[node.id]
+                    raise ValueError(f"Unknown variable: {node.id}")
+                elif isinstance(node, ast.Expression):
+                    return safe_eval(node.body)
+                else:
+                    raise ValueError(f"Unsupported node type: {type(node)}")
+
+            tree = ast.parse(eval_expr, mode='eval')
+            return float(safe_eval(tree))
+        except Exception:
             return None
 
     def to_latex(self, expression: str) -> str:

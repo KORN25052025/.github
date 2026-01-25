@@ -37,8 +37,12 @@ def api_request(method: str, endpoint: str, data: dict = None) -> Optional[dict]
 
 def check_api_connection() -> bool:
     """Check if API is available."""
-    result = api_request("GET", "/health")
-    return result is not None
+    # Health endpoint is at root level, not under /api/v1
+    try:
+        response = requests.get("http://localhost:8000/health", timeout=5)
+        return response.status_code == 200
+    except requests.exceptions.RequestException:
+        return False
 
 
 def get_quick_stats() -> Dict:
