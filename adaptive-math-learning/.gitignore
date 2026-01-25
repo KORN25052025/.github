@@ -33,3 +33,12 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Audit reports
+audit_report.json
+
+# Windows artifacts
+nul
+
+# Claude Code
+.claude/
