@@ -24,7 +24,7 @@ async def start_diagnostic(req: StartDiagnosticRequest):
     try:
         session = diagnostic_service.start_diagnostic(
             user_id=req.user_id,
-            grade_level=req.grade_level,
+            grade_level=req.grade_level or 5,
         )
         return session
     except Exception as e:
