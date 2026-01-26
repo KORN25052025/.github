@@ -1,6 +1,6 @@
 """Exam Preparation API routes."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 
@@ -16,7 +16,7 @@ class ExamSessionRequest(BaseModel):
     question_count: int = 20
 
 class MockExamRequest(BaseModel):
-    user_id: str
+    user_id: str = "current_user"
 
 class EvaluateExamRequest(BaseModel):
     answers: Dict[str, str]
@@ -32,20 +32,21 @@ async def generate_exam_session(req: ExamSessionRequest):
             topics=req.topics,
             question_count=req.question_count,
         )
-        return {"status": "success", "session": session}
+        return session
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/mock/{exam_type}")
-async def generate_mock_exam(exam_type: str, req: MockExamRequest):
+async def generate_mock_exam(exam_type: str, req: Optional[MockExamRequest] = Body(None)):
     """Deneme sinavi olustur."""
     try:
+        user_id = req.user_id if req else "current_user"
         exam = exam_prep_service.generate_mock_exam(
             exam_type=exam_type,
-            user_id=req.user_id,
+            user_id=user_id,
         )
-        return {"status": "success", "exam": exam}
+        return exam
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -58,7 +59,7 @@ async def evaluate_exam(session_id: str, req: EvaluateExamRequest):
             session_id=session_id,
             answers=req.answers,
         )
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Sinav oturumu bulunamadi.")
     except Exception as e:
@@ -70,7 +71,7 @@ async def get_exam_statistics(user_id: str, exam_type: str):
     """Kullanicinin sinav istatistiklerini getir."""
     try:
         stats = exam_prep_service.get_exam_statistics(user_id, exam_type)
-        return {"status": "success", "statistics": stats}
+        return stats
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -80,6 +81,6 @@ async def get_topic_weights(exam_type: str):
     """Sinav turune gore konu agirliklarini getir."""
     try:
         weights = exam_prep_service.get_topic_weights(exam_type)
-        return {"status": "success", "weights": weights}
+        return weights
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

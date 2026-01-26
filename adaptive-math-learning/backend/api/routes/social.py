@@ -55,7 +55,7 @@ async def create_duel(req: CreateDuelRequest):
             topic=req.topic,
             question_count=req.question_count,
         )
-        return {"status": "success", "duel": duel}
+        return duel
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -65,7 +65,7 @@ async def join_duel(duel_id: str, req: JoinDuelRequest):
     """Duelloya katil."""
     try:
         result = duel_service.join_duel(duel_id=duel_id, user_id=req.user_id)
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Duello bulunamadi.")
     except Exception as e:
@@ -82,7 +82,7 @@ async def submit_duel_answer(duel_id: str, req: DuelAnswerRequest):
             question_id=req.question_id,
             answer=req.answer,
         )
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Duello bulunamadi.")
     except Exception as e:
@@ -94,7 +94,7 @@ async def get_duel_status(duel_id: str):
     """Duello durumunu getir."""
     try:
         status = duel_service.get_duel_status(duel_id)
-        return {"status": "success", "duel_status": status}
+        return status
     except KeyError:
         raise HTTPException(status_code=404, detail="Duello bulunamadi.")
     except Exception as e:
@@ -111,7 +111,7 @@ async def create_tournament(req: CreateTournamentRequest):
             topic=req.topic,
             max_participants=req.max_participants,
         )
-        return {"status": "success", "tournament": tournament}
+        return tournament
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -124,7 +124,7 @@ async def join_tournament(tournament_id: str, req: JoinTournamentRequest):
             tournament_id=tournament_id,
             user_id=req.user_id,
         )
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Turnuva bulunamadi.")
     except Exception as e:
@@ -136,7 +136,7 @@ async def get_tournament_leaderboard(tournament_id: str):
     """Turnuva siralama tablosunu getir."""
     try:
         leaderboard = tournament_service.get_leaderboard(tournament_id)
-        return {"status": "success", "leaderboard": leaderboard}
+        return leaderboard
     except KeyError:
         raise HTTPException(status_code=404, detail="Turnuva bulunamadi.")
     except Exception as e:
@@ -151,7 +151,7 @@ async def send_friend_request(req: FriendRequestModel):
             from_user_id=req.from_user_id,
             to_user_id=req.to_user_id,
         )
-        return {"status": "success", "result": result}
+        return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -161,7 +161,7 @@ async def get_friends(user_id: str):
     """Arkadas listesini getir."""
     try:
         friends = friend_service.get_friends(user_id)
-        return {"status": "success", "friends": friends}
+        return friends
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -171,6 +171,6 @@ async def get_current_competition():
     """Haftalik yarisma bilgilerini getir."""
     try:
         competition = weekly_competition_service.get_current_competition()
-        return {"status": "success", "competition": competition}
+        return competition
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

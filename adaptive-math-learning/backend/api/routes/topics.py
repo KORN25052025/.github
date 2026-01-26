@@ -13,7 +13,7 @@ from ...schemas import TopicListResponse
 router = APIRouter()
 
 
-@router.get("/topics", response_model=List[TopicListResponse])
+@router.get("/topics")
 async def get_topics(
     grade_level: int = None,
     db: Session = Depends(get_db)
@@ -36,15 +36,17 @@ async def get_topics(
             Subtopic.is_active == True
         ).count()
 
-        result.append(TopicListResponse(
-            id=topic.id,
-            name=topic.name,
-            slug=topic.slug,
-            description=topic.description,
-            grade_range=f"{topic.grade_range_start}-{topic.grade_range_end}",
-            subtopic_count=subtopic_count,
-            mastery_score=None,  # Would be populated if we had user context
-        ))
+        result.append({
+            "id": topic.id,
+            "name": topic.name,
+            "slug": topic.slug,
+            "description": topic.description,
+            "grade_range": f"{topic.grade_range_start}-{topic.grade_range_end}",
+            "grade_range_start": topic.grade_range_start,
+            "grade_range_end": topic.grade_range_end,
+            "subtopic_count": subtopic_count,
+            "mastery_score": None,
+        })
 
     return result
 
@@ -71,6 +73,8 @@ async def get_topic(topic_slug: str, db: Session = Depends(get_db)):
         "slug": topic.slug,
         "description": topic.description,
         "grade_range": f"{topic.grade_range_start}-{topic.grade_range_end}",
+        "grade_range_start": topic.grade_range_start,
+        "grade_range_end": topic.grade_range_end,
         "subtopics": [
             {
                 "id": s.id,

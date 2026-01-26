@@ -14,7 +14,7 @@ class StartDiagnosticRequest(BaseModel):
     grade_level: Optional[int] = None
 
 class SubmitAnswerRequest(BaseModel):
-    question_id: str
+    question_id: Optional[str] = None
     answer: str
 
 
@@ -26,7 +26,7 @@ async def start_diagnostic(req: StartDiagnosticRequest):
             user_id=req.user_id,
             grade_level=req.grade_level,
         )
-        return {"status": "success", "session": session}
+        return session
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -37,8 +37,8 @@ async def get_next_question(session_id: str):
     try:
         question = diagnostic_service.get_next_question(session_id)
         if question is None:
-            return {"status": "completed", "message": "Test tamamlandi."}
-        return {"status": "success", "question": question}
+            return {"message": "Test tamamlandi.", "completed": True}
+        return question
     except KeyError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:
@@ -54,7 +54,7 @@ async def submit_answer(session_id: str, req: SubmitAnswerRequest):
             question_id=req.question_id,
             answer=req.answer,
         )
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:
@@ -66,7 +66,7 @@ async def complete_diagnostic(session_id: str):
     """Tanilayici testi tamamla."""
     try:
         result = diagnostic_service.complete_diagnostic(session_id)
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:
@@ -78,7 +78,7 @@ async def get_placement_result(session_id: str):
     """Yerlestirme sonucunu getir."""
     try:
         result = diagnostic_service.get_placement_result(session_id)
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:

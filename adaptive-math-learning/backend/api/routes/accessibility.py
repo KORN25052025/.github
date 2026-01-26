@@ -37,12 +37,23 @@ class SimplifyRequest(BaseModel):
     question_data: Dict[str, Any]
     level: str = "moderate"  # "minimal", "moderate", "maximum"
 
+class SimplifyTextRequest(BaseModel):
+    question_text: str = ""
+    question_data: Optional[Dict[str, Any]] = None
+    level: str = "moderate"
+
+class ScaffoldingRequest(BaseModel):
+    topic: str = ""
+    difficulty: str = "moderate"
+    question_data: Optional[Dict[str, Any]] = None
+    level: str = "moderate"
+
 
 @router.get("/settings/{user_id}")
 async def get_settings(user_id: str):
     """Kullanici erisebilirlik ayarlarini getir."""
     prefs = accessibility_settings_service.get_settings(user_id)
-    return {"status": "success", "settings": prefs.to_dict()}
+    return prefs.to_dict()
 
 
 @router.put("/settings/{user_id}")
@@ -51,7 +62,7 @@ async def update_settings(user_id: str, req: UpdateSettingsRequest):
     try:
         updates = req.dict(exclude_none=True)
         prefs = accessibility_settings_service.update_settings(user_id, updates)
-        return {"status": "success", "settings": prefs.to_dict()}
+        return prefs.to_dict()
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -63,7 +74,7 @@ async def generate_speech(req: TTSRequest):
     """Metinden sese donustur."""
     try:
         result = tts_service.generate_speech(text=req.text, lang=req.language)
-        return {"status": "success", "speech": result.to_dict()}
+        return result.to_dict()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -74,7 +85,7 @@ async def get_math_glossary(term: str, lang: str = "tr"):
     entry = multi_language_service.get_math_glossary(term, lang)
     if entry is None:
         raise HTTPException(status_code=404, detail="Terim bulunamadi.")
-    return {"status": "success", "entry": entry}
+    return entry
 
 
 @router.get("/glossary")
@@ -83,26 +94,27 @@ async def search_glossary(q: str = "", lang: str = "tr"):
     if not q:
         raise HTTPException(status_code=400, detail="Arama sorgusu gerekli.")
     results = multi_language_service.search_glossary(q, lang)
-    return {"status": "success", "results": results, "count": len(results)}
+    return results
 
 
 @router.get("/languages")
 async def get_available_languages():
     """Desteklenen dilleri listele."""
     languages = multi_language_service.get_available_languages()
-    return {"status": "success", "languages": languages}
+    return languages
 
 
 @router.post("/simplify")
-async def get_simplified_question(req: SimplifyRequest):
+async def get_simplified_question(req: SimplifyTextRequest):
     """Soruyu basitlestir (ozel egitim destegi)."""
     try:
         level = SimplificationLevel(req.level)
+        question_data = req.question_data or {"question_text": req.question_text}
         simplified = special_education_service.get_simplified_question(
-            question_data=req.question_data,
+            question_data=question_data,
             level=level,
         )
-        return {"status": "success", "simplified": simplified.to_dict()}
+        return simplified.to_dict()
     except ValueError:
         raise HTTPException(status_code=400, detail="Gecersiz basitlestirme seviyesi.")
     except Exception as e:
@@ -110,15 +122,16 @@ async def get_simplified_question(req: SimplifyRequest):
 
 
 @router.post("/scaffolding")
-async def get_scaffolding(req: SimplifyRequest):
+async def get_scaffolding(req: ScaffoldingRequest):
     """Ek ogrenme destegi getir."""
     try:
         level = SimplificationLevel(req.level)
+        question_data = req.question_data or {"topic": req.topic, "difficulty": req.difficulty}
         scaffolding = special_education_service.get_extra_scaffolding(
-            question_data=req.question_data,
+            question_data=question_data,
             level=level,
         )
-        return {"status": "success", "scaffolding": scaffolding.to_dict()}
+        return scaffolding.to_dict()
     except ValueError:
         raise HTTPException(status_code=400, detail="Gecersiz seviye.")
     except Exception as e:
@@ -129,4 +142,4 @@ async def get_scaffolding(req: SimplifyRequest):
 async def get_celebration():
     """Rastgele Turkce kutlama mesaji getir."""
     message = special_education_service.celebration_feedback()
-    return {"status": "success", "message": message}
+    return {"message": message}
