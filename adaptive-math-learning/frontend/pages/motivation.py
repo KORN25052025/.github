@@ -345,6 +345,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
+# Session state defaults (moved to top for safe initialization)
+# ---------------------------------------------------------------------------
+_SESSION_DEFAULTS = {
+    "puzzle_answer": "",
+    "puzzle_result": None,
+    "puzzle_hint_index": 0,
+    "puzzle_hints_shown": [],
+}
+for _k, _v in _SESSION_DEFAULTS.items():
+    if _k not in st.session_state:
+        st.session_state[_k] = _v
+
+# ---------------------------------------------------------------------------
 # Yardimci fonksiyonlar ve yedek veriler
 # ---------------------------------------------------------------------------
 
@@ -696,16 +709,6 @@ with tab_puzzle:
     </div>
     """, unsafe_allow_html=True)
 
-    # Session state baslat
-    if "puzzle_answer" not in st.session_state:
-        st.session_state.puzzle_answer = ""
-    if "puzzle_result" not in st.session_state:
-        st.session_state.puzzle_result = None
-    if "puzzle_hint_index" not in st.session_state:
-        st.session_state.puzzle_hint_index = 0
-    if "puzzle_hints_shown" not in st.session_state:
-        st.session_state.puzzle_hints_shown = []
-
     col_input, col_actions = st.columns([3, 2])
 
     with col_input:
@@ -741,7 +744,7 @@ with tab_puzzle:
 
         with btn_col2:
             if st.button("\U0001f4a1 Ipucu", key="hint_puzzle", use_container_width=True):
-                hint_resp = api_get(f"/motivation/puzzle/{puzzle_id}/hint", params={"hint_index": st.session_state.puzzle_hint_index})
+                hint_resp = api_get(f"/motivation/puzzle/{puzzle_id}/hint", params={"hint_index": getattr(st.session_state, "puzzle_hint_index", 0)})
                 if hint_resp and isinstance(hint_resp, dict):
                     hint_text = hint_resp.get("hint", "")
                 elif hint_resp and isinstance(hint_resp, str):
@@ -749,14 +752,14 @@ with tab_puzzle:
                 else:
                     # Yedek ipucu
                     hints = puzzle_data.get("hints", [])
-                    idx = min(st.session_state.puzzle_hint_index, len(hints) - 1) if hints else -1
+                    idx = min(getattr(st.session_state, "puzzle_hint_index", 0), len(hints) - 1) if hints else -1
                     hint_text = hints[idx] if idx >= 0 else "Ipucu bulunamadi."
-                if hint_text and hint_text not in st.session_state.puzzle_hints_shown:
+                if hint_text and hint_text not in getattr(st.session_state, "puzzle_hints_shown", []):
                     st.session_state.puzzle_hints_shown.append(hint_text)
-                st.session_state.puzzle_hint_index += 1
+                st.session_state.puzzle_hint_index = getattr(st.session_state, "puzzle_hint_index", 0) + 1
 
     # Gosterilen ipuclari
-    for i, hint in enumerate(st.session_state.puzzle_hints_shown):
+    for i, hint in enumerate(getattr(st.session_state, "puzzle_hints_shown", [])):
         st.markdown(f"""
         <div class="hint-box">
             <strong>\U0001f4a1 Ipucu {i + 1}:</strong> {hint}
@@ -764,8 +767,8 @@ with tab_puzzle:
         """, unsafe_allow_html=True)
 
     # Sonuc goster
-    if st.session_state.puzzle_result:
-        result = st.session_state.puzzle_result
+    if getattr(st.session_state, "puzzle_result", None):
+        result = getattr(st.session_state, "puzzle_result", {})
         is_correct = result.get("correct", False)
         message = result.get("message", "")
         explanation = result.get("explanation", "")

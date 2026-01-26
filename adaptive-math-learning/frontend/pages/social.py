@@ -567,7 +567,7 @@ with tab_duel:
 
     active_id_input = st.text_input(
         "Duello ID girin veya mevcut aktif ID'yi kullanin",
-        value=st.session_state.active_duel_id,
+        value=getattr(st.session_state, "active_duel_id", ""),
         key="active_duel_status_id",
     )
 
@@ -649,7 +649,7 @@ with tab_duel:
             )
 
         if ans_submit:
-            d_id = st.session_state.active_duel_id or active_id_input
+            d_id = getattr(st.session_state, "active_duel_id", "") or active_id_input
             if not d_id:
                 st.error("Oncelikle bir Duello ID belirleyin.")
             elif not ans_user or not ans_q_id or not ans_value:
@@ -783,7 +783,7 @@ with tab_tournament:
 
     lb_trn_id = st.text_input(
         "Liderlik tablosu icin Turnuva ID girin",
-        value=st.session_state.active_tournament_id,
+        value=getattr(st.session_state, "active_tournament_id", ""),
         key="lb_trn_id",
     )
 
