@@ -1,0 +1,13 @@
+"""
+Enhanced Parent & Teacher Dashboard Services
+=============================================
+
+Öğretmen ve veli panelleri için gelişmiş servisler.
+Ödev yönetimi, haftalık raporlar, hedef belirleme ve sınıf analizleri.
+
+Services:
+    - HomeworkService: Ödev oluşturma, gönderme ve otomatik değerlendirme
+    - WeeklyReportService: Haftalık ilerleme raporları
+    - GoalSettingService: Öğrenme hedefleri belirleme ve takip
+    - ClassAnalyticsService: Sınıf düzeyinde analiz ve raporlama
+"""

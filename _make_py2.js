@@ -1,0 +1,73 @@
+const fs = require("fs");
+const pp = require("path");
+const target = pp.join("C:", "Users", "ahmet", "Desktop", ".github",
+    "adaptive-math-learning", "backend", "services",
+    "enhanced_parent_teacher_service.py");
+const DQ = String.fromCharCode(34);
+const SQ = String.fromCharCode(39);
+const Q3 = DQ + DQ + DQ;
+const lines = [];
+function L(s) { lines.push(s); }
+function B() { lines.push(""); }
+
+B(); B();
+L("# ---------------------------------------------------------------------------");
+L("# Simulated Data Store");
+L("# ---------------------------------------------------------------------------");
+B();
+L("class _DataStore:");
+L("    " + Q3);
+L("    In-memory data store simulating database access.");
+L("    In production this layer is replaced by PostgreSQL / MongoDB.");
+L("    " + Q3);
+B();
+L("    def __init__(self) -> None:");
+L("        self.homeworks: Dict[str, Homework] = {}");
+L("        self.submissions: Dict[str, HomeworkSubmission] = {}");
+L("        self.weekly_reports: Dict[str, WeeklyReport] = {}");
+L("        self.learning_goals: Dict[str, LearningGoal] = {}");
+L("        self.student_activity: Dict[str, List[Dict[str, Any]]] = {}");
+L("        self.class_rosters: Dict[str, List[str]] = {}");
+L("        self.question_bank: Dict[str, List[Dict[str, Any]]] = {}");
+L("        self.parent_children: Dict[str, List[str]] = {}");
+L("        self.parent_emails: Dict[str, str] = {}");
+B();
+L("    def get_student_activity(self, student_id: str, since: Optional[datetime] = None) -> List[Dict[str, Any]]:");
+L("        " + Q3 + "Ogrencinin aktivite kaydini dondurur." + Q3);
+L("        activities = self.student_activity.get(student_id, [])");
+L("        if since:");
+L("            activities = [a for a in activities if a.get(" + DQ + "timestamp" + DQ + ", datetime.min) >= since]");
+L("        return activities");
+B();
+L("    def get_class_students(self, class_id: str) -> List[str]:");
+L("        " + Q3 + "Siniftaki ogrenci ID listesini dondurur." + Q3);
+L("        return self.class_rosters.get(class_id, [])");
+B();
+L("    def get_student_name(self, student_id: str) -> str:");
+L("        " + Q3 + "Placeholder - in production comes from user service." + Q3);
+L("        return f" + DQ + "Ogrenci_{student_id[:6]}" + DQ);
+B();
+L("    def generate_questions_for_topics(self, topics: List[str], count: int) -> List[Dict[str, Any]]:");
+L("        " + Q3 + "Konulara gore soru uretir (simulasyon)." + Q3);
+L("        questions: List[Dict[str, Any]] = []");
+L("        per_topic = max(1, count // len(topics))");
+L("        remaining = count - per_topic * len(topics)");
+L("        for idx, topic in enumerate(topics):");
+L("            topic_count = per_topic + (1 if idx < remaining else 0)");
+L("            for q_idx in range(topic_count):");
+L("                question_id = str(uuid.uuid4())");
+L("                questions.append({" + DQ + "question_id" + DQ + ": question_id, " + DQ + "topic" + DQ + ": topic,");
+L("                    " + DQ + "soru_metni" + DQ + ": f" + DQ + "{topic} - Soru {q_idx + 1}" + DQ + ",");
+L("                    " + DQ + "secenekler" + DQ + ": [" + DQ + "A" + DQ + ", " + DQ + "B" + DQ + ", " + DQ + "C" + DQ + ", " + DQ + "D" + DQ + "],");
+L("                    " + DQ + "dogru_cevap" + DQ + ": " + DQ + "A" + DQ + ", " + DQ + "zorluk" + DQ + ": " + DQ + "orta" + DQ + ",");
+L("                    " + DQ + "puan" + DQ + ": round(100 / count, 2)})");
+L("                if len(questions) >= count:");
+L("                    break");
+L("            if len(questions) >= count:");
+L("                break");
+L("        return questions[:count]");
+B(); B();
+L("_store = _DataStore()");
+
+fs.appendFileSync(target, lines.join("\n") + "\n", "utf8");
+console.log("DataStore appended:", lines.length, "lines");

@@ -1,0 +1,75 @@
+const fs = require("fs");
+const pp = require("path");
+const target = pp.join("C:", "Users", "ahmet", "Desktop", ".github",
+    "adaptive-math-learning", "backend", "services",
+    "enhanced_parent_teacher_service.py");
+const DQ = String.fromCharCode(34);
+const SQ = String.fromCharCode(39);
+const Q3 = DQ + DQ + DQ;
+const lines = [];
+function L(s) { lines.push(s); }
+function B() { lines.push(""); }
+
+B(); B();
+L("# ---------------------------------------------------------------------------");
+L("# HomeworkService - Odev Yonetimi");
+L("# ---------------------------------------------------------------------------");
+B();
+L("class HomeworkService:");
+L("    " + Q3);
+L("    Odev olusturma, teslim alma ve otomatik degerlendirme servisi.");
+L("    Ogretmenler odev olusturur, ogrenciler teslim eder,");
+L("    sistem otomatik olarak degerlendirir.");
+L("    " + Q3);
+B();
+L("    def __init__(self, store: Optional[_DataStore] = None) -> None:");
+L("        self._store = store or _store");
+B();
+L("    def create_homework(self, teacher_id: str, class_id: str, topics: List[str],");
+L("                        question_count: int, due_date: datetime, title: str) -> Homework:");
+L("        " + Q3 + "Yeni odev olusturur ve sinifa atar." + Q3);
+L("        if question_count <= 0:");
+L("            raise ValueError(" + DQ + "Soru sayisi pozitif olmalidir." + DQ + ")");
+L("        if not topics:");
+L("            raise ValueError(" + DQ + "En az bir konu belirtilmelidir." + DQ + ")");
+L("        if due_date <= datetime.utcnow():");
+L("            raise ValueError(" + DQ + "Son teslim tarihi gelecekte olmalidir." + DQ + ")");
+L("        homework_id = str(uuid.uuid4())");
+L("        questions = self._store.generate_questions_for_topics(topics, question_count)");
+L("        students = self._store.get_class_students(class_id)");
+L("        homework = Homework(homework_id=homework_id, teacher_id=teacher_id, class_id=class_id,");
+L("            title=title, topics=topics, question_count=question_count, questions=questions,");
+L("            due_date=due_date, created_at=datetime.utcnow(), status=HomeworkStatus.ASSIGNED,");
+L("            toplam_ogrenci=len(students))");
+L("        self._store.homeworks[homework_id] = homework");
+L("        return homework");
+B();
+L("    def get_homework(self, homework_id: str) -> Homework:");
+L("        " + Q3 + "Odev detaylarini getirir." + Q3);
+L("        if homework_id not in self._store.homeworks:");
+L("            raise KeyError(f" + DQ + "Odev bulunamadi: {homework_id}" + DQ + ")");
+L("        homework = self._store.homeworks[homework_id]");
+L("        self._refresh_homework_status(homework)");
+L("        return homework");
+B();
+L("    def submit_homework(self, homework_id: str, student_id: str, answers: List[Dict[str, Any]]) -> HomeworkSubmission:");
+L("        " + Q3 + "Ogrenci odev teslimi yapar." + Q3);
+L("        homework = self.get_homework(homework_id)");
+L("        if homework.status == HomeworkStatus.CANCELLED:");
+L("            raise ValueError(" + DQ + "Bu odev iptal edilmistir." + DQ + ")");
+L("        if datetime.utcnow() > homework.due_date:");
+L("            raise ValueError(" + DQ + "Odev teslim suresi gecmistir." + DQ + ")");
+L("        existing = self._find_submission(homework_id, student_id)");
+L("        if existing is not None:");
+L("            raise ValueError(" + DQ + "Bu odev zaten teslim edilmis." + DQ + ")");
+L("        submission_id = str(uuid.uuid4())");
+L("        submission = HomeworkSubmission(submission_id=submission_id, homework_id=homework_id,");
+L("            student_id=student_id, answers=answers, submitted_at=datetime.utcnow())");
+L("        self._store.submissions[submission_id] = submission");
+L("        homework.teslim_sayisi += 1");
+L("        if homework.status == HomeworkStatus.ASSIGNED:");
+L("            homework.status = HomeworkStatus.IN_PROGRESS");
+L("        return submission");
+
+fs.appendFileSync(target, lines.join("\n") + "\n", "utf8");
+console.log("HW part a appended:", lines.length, "lines");

@@ -1,0 +1,7 @@
+const fs = require("fs");
+const target = "C:/Users/ahmet/Desktop/.github/adaptive-math-learning/backend/services/accessibility_service.py";
+const parts = [];
+parts.push(Buffer.from("IiIiCkFjY2Vzc2liaWxpdHkgYW5kIEluY2x1c2l2aXR5IFNlcnZpY2UgZm9yIHRoZSBBZGFwdGl2ZSBNYXRoIExlYXJuaW5nIFBsYXRmb3JtLgoKUHJvdmlkZXMgdGV4dC10by1zcGVlY2gsIG11bHRpLWxhbmd1YWdlIHN1cHBvcnQsIGFjY2Vzc2liaWxpdHkgc2V0dGluZ3MsCmFuZCBzcGVjaWFsIGVkdWNhdGlvbiBhY2NvbW1vZGF0aW9ucyBmb3IgYSBUdXJraXNoIG1hdGggbGVhcm5pbmcgcGxhdGZvcm0uClN1cHBvcnRzIFR1cmtpc2ggKHRyKSwgRW5nbGlzaCAoZW4pLCBLdXJkaXNoIChrdSksIGFuZCBBcmFiaWMgKGFyKS4KIiIiCgpmcm9tIF9fZnV0dXJlX18gaW1wb3J0IGFubm90YXRpb25zCgppbXBvcnQgaGFzaGxpYgppbXBvcnQgcmFuZG9tCmltcG9ydCByZQppbXBvcnQgdXVpZApmcm9tIGRhdGFjbGFzc2VzIGltcG9ydCBkYXRhY2xhc3MsIGZpZWxkCmZyb20gZGF0ZXRpbWUgaW1wb3J0IGRhdGV0aW1lCmZyb20gZW51bSBpbXBvcnQgRW51bQpmcm9tIHR5cGluZyBpbXBvcnQgQW55LCBEaWN0LCBMaXN0LCBPcHRpb25hbCwgVHVwbGUK", "base64").toString("utf8"));
+// More parts will be appended
+// fs.writeFileSync(target, parts.join(""), "utf8");
+// console.log("Done");

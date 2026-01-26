@@ -1,0 +1,15 @@
+# Windows artifacts
+nul
+
+# Claude Code
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.db
+*.sqlite3
+
+# IDE
+.idea/
+.vscode/

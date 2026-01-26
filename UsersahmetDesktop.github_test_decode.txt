@@ -1,0 +1,22 @@
+"""
+Spaced Repetition Service (Aralikli Tekrar Servisi)
+
+A wrong-answer notebook and SM-2 based spaced repetition system
+for the Turkish adaptive math learning platform.
+
+This module provides:
+  - Wrong answer tracking and notebook management
+  - SM-2 (SuperMemo 2) algorithm for optimal review scheduling
+  - Review queue generation and statistics
+
+SM-2 Algorithm Summary:
+  - Quality response scale: 0-5
+      0: Complete blackout
+      1: Incorrect, but remembered upon seeing the answer
+      2: Incorrect, but the correct answer seemed easy to recall
+      3: Correct, but with significant difficulty
+      4: Correct, after some hesitation
+      5: Perfect response
+  - Ease factor (EF) >= 1.3, starts at 2.5
+  - Intervals: 1 day -> 6 days -> previous_interval * EF
+"""
