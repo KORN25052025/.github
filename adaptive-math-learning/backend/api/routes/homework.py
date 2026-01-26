@@ -50,7 +50,7 @@ async def create_homework(req: CreateHomeworkRequest):
             due_date=req.due_date,
             title=req.title,
         )
-        return {"status": "success", "homework": hw}
+        return hw
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -62,7 +62,7 @@ async def get_homework(homework_id: str):
         hw = homework_service.get_homework(homework_id)
         if hw is None:
             raise HTTPException(status_code=404, detail="Odev bulunamadi.")
-        return {"status": "success", "homework": hw}
+        return hw
     except HTTPException:
         raise
     except Exception as e:
@@ -78,7 +78,7 @@ async def submit_homework(homework_id: str, req: SubmitHomeworkRequest):
             student_id=req.student_id,
             answers=req.answers,
         )
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Odev bulunamadi.")
     except Exception as e:
@@ -93,7 +93,7 @@ async def grade_homework(homework_id: str, req: GradeHomeworkRequest):
             homework_id=homework_id,
             teacher_id=req.teacher_id,
         )
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Odev bulunamadi.")
     except Exception as e:
@@ -105,7 +105,7 @@ async def get_student_homework_list(student_id: str):
     """Ogrencinin odevlerini listele."""
     try:
         homeworks = homework_service.get_student_homeworks(student_id)
-        return {"status": "success", "homeworks": homeworks}
+        return homeworks
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -124,7 +124,7 @@ async def set_goal(req: SetGoalRequest):
             target_value=req.target_value,
             deadline=deadline,
         )
-        return {"status": "success", "goal": goal.to_dict()}
+        return goal.to_dict()
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -136,7 +136,7 @@ async def get_goals(child_id: str):
     """Cocugun hedeflerini getir."""
     try:
         goals = goal_setting_service.get_goals(child_id)
-        return {"status": "success", "goals": [g.to_dict() for g in goals]}
+        return [g.to_dict() for g in goals]
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -146,7 +146,7 @@ async def check_goal_progress(goal_id: str):
     """Hedef ilerlemesini kontrol et."""
     try:
         progress = goal_setting_service.check_progress(goal_id)
-        return {"status": "success", "progress": progress}
+        return progress
     except KeyError:
         raise HTTPException(status_code=404, detail="Hedef bulunamadi.")
     except Exception as e:
@@ -158,7 +158,7 @@ async def get_class_overview(class_id: str):
     """Sinif genel bakisini getir."""
     try:
         overview = class_analytics_service.get_class_overview(class_id)
-        return {"status": "success", "overview": overview}
+        return overview
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -168,7 +168,7 @@ async def get_class_topic_analysis(class_id: str):
     """Sinifin konu analizini getir."""
     try:
         analysis = class_analytics_service.get_topic_analysis(class_id)
-        return {"status": "success", "analysis": analysis}
+        return analysis
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -178,6 +178,6 @@ async def get_at_risk_students(class_id: str):
     """Risk altindaki ogrencileri getir."""
     try:
         students = class_analytics_service.get_at_risk_students(class_id)
-        return {"status": "success", "at_risk_students": students}
+        return students
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

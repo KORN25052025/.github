@@ -121,4 +121,4 @@ async def store_answer_data(question_id: str, correct_answer: str, topic: str = 
         "correct_answer": correct_answer,
         "topic": topic,
     })
-    return {"status": "stored"}
+    return {"message": "stored"}

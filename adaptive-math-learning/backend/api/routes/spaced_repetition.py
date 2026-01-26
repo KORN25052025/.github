@@ -33,7 +33,7 @@ async def record_wrong_answer(req: RecordWrongAnswerRequest):
             user_answer=req.user_answer,
             correct_answer=req.correct_answer,
         )
-        return {"status": "success", "entry": entry}
+        return entry
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -43,7 +43,7 @@ async def get_review_queue(user_id: str):
     """Tekrar kuyrugunu getir."""
     try:
         queue = spaced_repetition_service.get_review_queue(user_id)
-        return {"status": "success", "queue": queue, "count": len(queue)}
+        return {"queue": queue, "count": len(queue)}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -57,7 +57,7 @@ async def submit_review(req: SubmitReviewRequest):
             question_id=req.question_id,
             quality=req.quality,
         )
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Kayit bulunamadi.")
     except Exception as e:
@@ -69,7 +69,7 @@ async def get_wrong_answer_notebook(user_id: str):
     """Yanlis soru defterini getir."""
     try:
         notebook = spaced_repetition_service.get_wrong_answer_notebook(user_id)
-        return {"status": "success", "notebook": notebook, "total": len(notebook)}
+        return {"notebook": notebook, "total": len(notebook)}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -79,7 +79,7 @@ async def get_srs_statistics(user_id: str):
     """SRS istatistiklerini getir."""
     try:
         stats = spaced_repetition_service.get_srs_statistics(user_id)
-        return {"status": "success", "statistics": stats}
+        return stats
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -89,6 +89,6 @@ async def clear_mastered(user_id: str):
     """Ogrenilmis kayitlari temizle."""
     try:
         count = spaced_repetition_service.clear_mastered(user_id)
-        return {"status": "success", "cleared_count": count}
+        return {"cleared_count": count}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

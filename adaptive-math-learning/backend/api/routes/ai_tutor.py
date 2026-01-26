@@ -36,7 +36,7 @@ async def start_session(req: StartSessionRequest):
             user_id=req.user_id,
             topic=req.topic,
         )
-        return {"status": "success", "session": session}
+        return session
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -50,7 +50,7 @@ async def send_message(session_id: str, req: SendMessageRequest):
             user_id=req.user_id,
             message=req.message,
         )
-        return {"status": "success", "response": response}
+        return response
     except KeyError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:
@@ -65,7 +65,7 @@ async def explain_question(req: ExplainQuestionRequest):
             user_id=req.user_id,
             question_data=req.question_data,
         )
-        return {"status": "success", "explanation": explanation}
+        return explanation
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -80,7 +80,7 @@ async def explain_error(req: ExplainErrorRequest):
             user_answer=req.user_answer,
             correct_answer=req.correct_answer,
         )
-        return {"status": "success", "explanation": explanation}
+        return explanation
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -90,7 +90,7 @@ async def get_session_history(session_id: str):
     """Oturum gecmisini getir."""
     try:
         history = ai_tutor_service.get_session_history(session_id)
-        return {"status": "success", "history": history}
+        return history
     except KeyError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:
@@ -102,7 +102,7 @@ async def end_session(session_id: str):
     """Oturumu sonlandir."""
     try:
         result = ai_tutor_service.end_session(session_id)
-        return {"status": "success", "result": result}
+        return result
     except KeyError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:
