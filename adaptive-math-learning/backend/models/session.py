@@ -2,7 +2,7 @@
 Learning Session model.
 """
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Index
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -16,6 +16,7 @@ class LearningSession(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     session_key = Column(String(50), unique=True, nullable=False, index=True)
+    user_id = Column(String(50), ForeignKey("users.id"), index=True)
     topic_id = Column(Integer, ForeignKey("topics.id"))
     subtopic_id = Column(Integer, ForeignKey("subtopics.id"))
     session_type = Column(String(20), default="practice")  # practice, quiz, test

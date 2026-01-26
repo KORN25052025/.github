@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .database import init_db
 from .api.routes import questions, answers, sessions, topics, progress, gamification, teacher, parent
+from .api.routes import exam_prep, diagnostic, spaced_repetition, ai_tutor, social, motivation, homework, accessibility
 
 settings = get_settings()
 
@@ -66,6 +67,16 @@ app.include_router(progress.router, prefix="/api/v1", tags=["Progress"])
 app.include_router(gamification.router, prefix="/api/v1", tags=["Gamification"])
 app.include_router(teacher.router, prefix="/api/v1", tags=["Teacher Dashboard"])
 app.include_router(parent.router, prefix="/api/v1", tags=["Parent Dashboard"])
+
+# New feature routers
+app.include_router(exam_prep.router, prefix="/api/v1", tags=["Exam Preparation"])
+app.include_router(diagnostic.router, prefix="/api/v1", tags=["Diagnostic Assessment"])
+app.include_router(spaced_repetition.router, prefix="/api/v1", tags=["Spaced Repetition"])
+app.include_router(ai_tutor.router, prefix="/api/v1", tags=["AI Tutor"])
+app.include_router(social.router, prefix="/api/v1", tags=["Social & Competition"])
+app.include_router(motivation.router, prefix="/api/v1", tags=["Motivation & Content"])
+app.include_router(homework.router, prefix="/api/v1", tags=["Homework & Goals"])
+app.include_router(accessibility.router, prefix="/api/v1", tags=["Accessibility"])
 
 
 if __name__ == "__main__":

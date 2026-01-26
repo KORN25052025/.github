@@ -2,7 +2,7 @@
 Mastery tracking model.
 """
 
-from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -19,8 +19,10 @@ class Mastery(Base):
     __tablename__ = "mastery"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String(50), ForeignKey("users.id"), index=True)
     topic_id = Column(Integer, ForeignKey("topics.id"), nullable=False)
     subtopic_id = Column(Integer, ForeignKey("subtopics.id"))
+    difficulty_tier = Column(Integer, default=1)
 
     # Mastery metrics
     mastery_score = Column(Float, default=0.5)  # 0.0 to 1.0
@@ -41,6 +43,11 @@ class Mastery(Base):
     __table_args__ = (
         UniqueConstraint('topic_id', 'subtopic_id', name='unique_topic_subtopic'),
     )
+
+    @property
+    def current_streak(self) -> int:
+        """Alias for streak field."""
+        return self.streak
 
     @property
     def accuracy(self) -> float:

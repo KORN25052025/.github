@@ -91,6 +91,156 @@
         {"name": "Part-to-Whole", "slug": "part_to_whole", "difficulty_base": 60, "display_order": 5},
         {"name": "Scale Problems", "slug": "scale", "difficulty_base": 60, "display_order": 6}
       ]
+    },
+    {
+      "name": "Exponents & Roots",
+      "slug": "exponents",
+      "description": "Powers, square roots, cube roots, exponent rules, and scientific notation",
+      "grade_range_start": 6,
+      "grade_range_end": 10,
+      "display_order": 7,
+      "subtopics": [
+        {"name": "Powers", "slug": "power", "difficulty_base": 30, "display_order": 1},
+        {"name": "Square Roots", "slug": "square_root", "difficulty_base": 35, "display_order": 2},
+        {"name": "Cube Roots", "slug": "cube_root", "difficulty_base": 45, "display_order": 3},
+        {"name": "Exponent Rules", "slug": "exponent_rules", "difficulty_base": 55, "display_order": 4},
+        {"name": "Scientific Notation", "slug": "scientific_notation", "difficulty_base": 50, "display_order": 5}
+      ]
+    },
+    {
+      "name": "Statistics & Probability",
+      "slug": "statistics",
+      "description": "Mean, median, mode, range, probability, combinations, and permutations",
+      "grade_range_start": 5,
+      "grade_range_end": 9,
+      "display_order": 8,
+      "subtopics": [
+        {"name": "Mean (Average)", "slug": "mean", "difficulty_base": 30, "display_order": 1},
+        {"name": "Median", "slug": "median", "difficulty_base": 35, "display_order": 2},
+        {"name": "Mode", "slug": "mode", "difficulty_base": 25, "display_order": 3},
+        {"name": "Range", "slug": "range", "difficulty_base": 20, "display_order": 4},
+        {"name": "Probability", "slug": "probability", "difficulty_base": 40, "display_order": 5},
+        {"name": "Combinations", "slug": "combination", "difficulty_base": 65, "display_order": 6},
+        {"name": "Permutations", "slug": "permutation", "difficulty_base": 70, "display_order": 7}
+      ]
+    },
+    {
+      "name": "Number Theory",
+      "slug": "number_theory",
+      "description": "Prime numbers, GCD (EBOB), LCM (EKOK), divisibility rules, and prime factorization",
+      "grade_range_start": 4,
+      "grade_range_end": 8,
+      "display_order": 9,
+      "subtopics": [
+        {"name": "Prime Numbers", "slug": "prime_check", "difficulty_base": 25, "display_order": 1},
+        {"name": "Divisibility Rules", "slug": "divisibility", "difficulty_base": 20, "display_order": 2},
+        {"name": "GCD (EBOB)", "slug": "gcd", "difficulty_base": 40, "display_order": 3},
+        {"name": "LCM (EKOK)", "slug": "lcm", "difficulty_base": 45, "display_order": 4},
+        {"name": "Prime Factorization", "slug": "factorization", "difficulty_base": 50, "display_order": 5}
+      ]
+    },
+    {
+      "name": "Systems of Equations",
+      "slug": "systems_of_equations",
+      "description": "Solving systems of linear equations with two or three variables",
+      "grade_range_start": 7,
+      "grade_range_end": 11,
+      "display_order": 10,
+      "subtopics": [
+        {"name": "Simple Two-Variable", "slug": "two_variable_easy", "difficulty_base": 30, "display_order": 1},
+        {"name": "Two-Variable Systems", "slug": "two_variable", "difficulty_base": 50, "display_order": 2},
+        {"name": "Word Problems", "slug": "two_variable_word", "difficulty_base": 60, "display_order": 3},
+        {"name": "Three-Variable Systems", "slug": "three_variable", "difficulty_base": 80, "display_order": 4}
+      ]
+    },
+    {
+      "name": "Inequalities",
+      "slug": "inequalities",
+      "description": "Linear inequalities, compound inequalities, and absolute value inequalities",
+      "grade_range_start": 7,
+      "grade_range_end": 11,
+      "display_order": 11,
+      "subtopics": [
+        {"name": "One-Step Inequalities", "slug": "one_step", "difficulty_base": 25, "display_order": 1},
+        {"name": "Two-Step Inequalities", "slug": "two_step", "difficulty_base": 45, "display_order": 2},
+        {"name": "Compound Inequalities", "slug": "compound", "difficulty_base": 60, "display_order": 3},
+        {"name": "Absolute Value Inequalities", "slug": "absolute_value", "difficulty_base": 70, "display_order": 4}
+      ]
+    },
+    {
+      "name": "Functions",
+      "slug": "functions",
+      "description": "Linear and quadratic functions, domain/range, composition, and inverse functions",
+      "grade_range_start": 8,
+      "grade_range_end": 12,
+      "display_order": 12,
+      "subtopics": [
+        {"name": "Linear Function Evaluation", "slug": "linear_eval", "difficulty_base": 25, "display_order": 1},
+        {"name": "Quadratic Function Evaluation", "slug": "quadratic_eval", "difficulty_base": 45, "display_order": 2},
+        {"name": "Domain & Range", "slug": "domain_range", "difficulty_base": 50, "display_order": 3},
+        {"name": "Function Composition", "slug": "composition", "difficulty_base": 60, "display_order": 4},
+        {"name": "Inverse Functions", "slug": "inverse", "difficulty_base": 65, "display_order": 5}
+      ]
+    },
+    {
+      "name": "Trigonometry",
+      "slug": "trigonometry",
+      "description": "Sine, cosine, tangent, trigonometric identities, and equations",
+      "grade_range_start": 9,
+      "grade_range_end": 12,
+      "display_order": 13,
+      "subtopics": [
+        {"name": "Special Angle Values", "slug": "special_angle", "difficulty_base": 35, "display_order": 1},
+        {"name": "Right Triangle Problems", "slug": "right_triangle", "difficulty_base": 45, "display_order": 2},
+        {"name": "Trigonometric Identities", "slug": "identity", "difficulty_base": 55, "display_order": 3},
+        {"name": "Trigonometric Equations", "slug": "trig_equation", "difficulty_base": 70, "display_order": 4}
+      ]
+    },
+    {
+      "name": "Polynomials",
+      "slug": "polynomials",
+      "description": "Polynomial operations, multiplication, factoring, and division",
+      "grade_range_start": 8,
+      "grade_range_end": 11,
+      "display_order": 14,
+      "subtopics": [
+        {"name": "Addition & Subtraction", "slug": "add_subtract", "difficulty_base": 30, "display_order": 1},
+        {"name": "Binomial Multiplication", "slug": "multiply_binomial", "difficulty_base": 45, "display_order": 2},
+        {"name": "Common Factor", "slug": "factor_common", "difficulty_base": 35, "display_order": 3},
+        {"name": "Factoring Trinomials", "slug": "factor_trinomial", "difficulty_base": 60, "display_order": 4},
+        {"name": "Difference of Squares", "slug": "factor_diff_squares", "difficulty_base": 50, "display_order": 5}
+      ]
+    },
+    {
+      "name": "Sets & Logic",
+      "slug": "sets_and_logic",
+      "description": "Set operations, Venn diagrams, union, intersection, and difference",
+      "grade_range_start": 6,
+      "grade_range_end": 10,
+      "display_order": 15,
+      "subtopics": [
+        {"name": "Set Union", "slug": "union", "difficulty_base": 25, "display_order": 1},
+        {"name": "Set Intersection", "slug": "intersection", "difficulty_base": 30, "display_order": 2},
+        {"name": "Set Difference", "slug": "difference", "difficulty_base": 40, "display_order": 3},
+        {"name": "Venn Diagrams (2 Sets)", "slug": "venn_two", "difficulty_base": 50, "display_order": 4},
+        {"name": "Venn Diagrams (3 Sets)", "slug": "venn_three", "difficulty_base": 70, "display_order": 5}
+      ]
+    },
+    {
+      "name": "Coordinate Geometry",
+      "slug": "coordinate_geometry",
+      "description": "Distance, midpoint, slope, line equations, and parallel/perpendicular lines",
+      "grade_range_start": 7,
+      "grade_range_end": 11,
+      "display_order": 16,
+      "subtopics": [
+        {"name": "Midpoint", "slug": "midpoint", "difficulty_base": 25, "display_order": 1},
+        {"name": "Distance (Simple)", "slug": "distance_simple", "difficulty_base": 30, "display_order": 2},
+        {"name": "Distance Formula", "slug": "distance", "difficulty_base": 40, "display_order": 3},
+        {"name": "Slope", "slug": "slope", "difficulty_base": 40, "display_order": 4},
+        {"name": "Line Equations", "slug": "line_equation", "difficulty_base": 55, "display_order": 5},
+        {"name": "Parallel & Perpendicular", "slug": "parallel_perpendicular", "difficulty_base": 50, "display_order": 6}
+      ]
     }
   ]
 }

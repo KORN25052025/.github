@@ -2,7 +2,7 @@
 User Response model.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey, Index
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -15,6 +15,7 @@ class Response(Base):
     __tablename__ = "responses"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String(50), ForeignKey("users.id"), index=True)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
     session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
 
@@ -29,6 +30,7 @@ class Response(Base):
 
     # Metadata
     answered_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
     question = relationship("Question", back_populates="responses")

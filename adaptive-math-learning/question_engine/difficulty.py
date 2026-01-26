@@ -46,6 +46,58 @@ class DifficultyCalculator:
         OperationType.AREA: 0.3,
         OperationType.PERIMETER: 0.2,
         OperationType.VOLUME: 0.5,
+        # Exponents & Roots
+        OperationType.EXPONENTIATION: 0.4,
+        OperationType.SQUARE_ROOT: 0.35,
+        OperationType.CUBE_ROOT: 0.45,
+        OperationType.SCIENTIFIC_NOTATION: 0.5,
+        # Statistics & Probability
+        OperationType.MEAN: 0.3,
+        OperationType.MEDIAN: 0.35,
+        OperationType.MODE: 0.25,
+        OperationType.RANGE: 0.2,
+        OperationType.PROBABILITY: 0.45,
+        OperationType.COMBINATION: 0.65,
+        OperationType.PERMUTATION: 0.7,
+        # Number Theory
+        OperationType.PRIME: 0.3,
+        OperationType.GCD: 0.4,
+        OperationType.LCM: 0.45,
+        OperationType.DIVISIBILITY: 0.2,
+        OperationType.FACTORIZATION: 0.5,
+        # Systems of Equations
+        OperationType.TWO_VARIABLE: 0.55,
+        OperationType.THREE_VARIABLE: 0.8,
+        # Inequalities
+        OperationType.LINEAR_INEQUALITY: 0.4,
+        OperationType.COMPOUND_INEQUALITY: 0.6,
+        OperationType.ABSOLUTE_VALUE_INEQUALITY: 0.7,
+        # Functions
+        OperationType.LINEAR_FUNCTION: 0.3,
+        OperationType.QUADRATIC_FUNCTION: 0.5,
+        OperationType.DOMAIN_RANGE: 0.5,
+        OperationType.COMPOSITION: 0.6,
+        OperationType.INVERSE_FUNCTION: 0.65,
+        # Trigonometry
+        OperationType.SINE: 0.4,
+        OperationType.COSINE: 0.4,
+        OperationType.TANGENT: 0.45,
+        OperationType.TRIG_EQUATION: 0.7,
+        # Polynomials
+        OperationType.POLYNOMIAL_ADD: 0.3,
+        OperationType.POLYNOMIAL_MULTIPLY: 0.45,
+        OperationType.FACTORING: 0.55,
+        OperationType.POLYNOMIAL_DIVISION: 0.65,
+        # Sets & Logic
+        OperationType.SET_UNION: 0.25,
+        OperationType.SET_INTERSECTION: 0.3,
+        OperationType.SET_DIFFERENCE: 0.4,
+        OperationType.VENN_DIAGRAM: 0.55,
+        # Coordinate Geometry
+        OperationType.DISTANCE: 0.4,
+        OperationType.MIDPOINT: 0.25,
+        OperationType.SLOPE: 0.4,
+        OperationType.LINE_EQUATION: 0.55,
     }
 
     # Magnitude thresholds for difficulty scaling

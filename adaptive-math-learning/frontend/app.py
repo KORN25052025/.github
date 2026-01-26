@@ -1,297 +1,454 @@
 """
-Streamlit main application.
+Adaptif Matematik Ogrenme Platformu - Ana Sayfa
 
-Adaptive Mathematics Learning System - Interactive Learning Platform
-This is the main entry point for the Streamlit multi-page app.
+TOBB ETU - BIL495/YAP495 Bahar 2025
+Streamlit ana giris noktasi. Modern, gorsel acidan etkileyici bir kontrol paneli.
 """
 
 import streamlit as st
-import requests
-from typing import Optional, Dict, List
+from frontend.theme import (
+    apply_theme,
+    render_sidebar,
+    api_get,
+    stat_card,
+    feature_card,
+    section_header,
+    progress_bar,
+    get_topic_color,
+    TOPIC_COLORS,
+)
 
-# Page config
+# ---------------------------------------------------------------------------
+# Sayfa Yapilandirmasi
+# ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Adaptive Math Learning",
+    page_title="Adaptif Matematik Ogrenme Platformu",
     page_icon="🧮",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Backend API URL
 API_URL = "http://localhost:8000/api/v1"
 
+# ---------------------------------------------------------------------------
+# Tema & Kenar Cubugu
+# ---------------------------------------------------------------------------
+apply_theme()
+render_sidebar(active_page="app")
 
-def api_request(method: str, endpoint: str, data: dict = None) -> Optional[dict]:
-    """Make API request to backend."""
-    try:
-        url = f"{API_URL}{endpoint}"
-        if method == "GET":
-            response = requests.get(url, params=data, timeout=10)
-        else:
-            response = requests.post(url, json=data, timeout=10)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.ConnectionError:
-        return None
-    except requests.exceptions.RequestException:
-        return None
+# ---------------------------------------------------------------------------
+# Ek CSS - Sayfa icin ozel stiller
+# ---------------------------------------------------------------------------
+st.markdown("""
+<style>
+/* Hero icerigi */
+.hero-title {
+    font-size: 2.4em;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 8px 0;
+    line-height: 1.15;
+}
+.hero-subtitle {
+    font-size: 1.1em;
+    color: rgba(255,255,255,0.92);
+    margin: 0 0 20px 0;
+    line-height: 1.6;
+}
+.hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 24px;
+    padding: 6px 16px;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+}
+/* Hero gorsel bolumu */
+.hero-visual {
+    text-align: center;
+    padding: 24px 0;
+}
+.hero-visual-icon {
+    font-size: 6em;
+    line-height: 1;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+}
+.hero-visual-text {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.9em;
+    margin-top: 12px;
+}
+
+/* Oneri karti */
+.recommendation-card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.07);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 8px;
+}
+.recommendation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+}
+.rec-topic-name {
+    font-size: 1.15em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+.rec-reason {
+    font-size: 0.85em;
+    color: #888;
+    margin-bottom: 12px;
+}
+
+/* Konu kartlari (grid) */
+.topic-grid-card {
+    border-radius: 14px;
+    padding: 20px;
+    color: white;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    transition: transform 0.25s, box-shadow 0.25s;
+    cursor: default;
+    min-height: 120px;
+}
+.topic-grid-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.22);
+}
+.topic-grid-name {
+    font-size: 1.1em;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.topic-grid-desc {
+    font-size: 0.82em;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.4;
+}
+.topic-grid-grade {
+    display: inline-block;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.22);
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+/* Alt bilgi */
+.app-footer {
+    text-align: center;
+    padding: 32px 0 16px 0;
+    color: #aaa;
+    font-size: 0.85em;
+    border-top: 1px solid #eee;
+    margin-top: 48px;
+}
+.app-footer strong {
+    color: #667eea;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
-def check_api_connection() -> bool:
-    """Check if API is available."""
-    try:
-        response = requests.get("http://localhost:8000/health", timeout=5)
-        return response.status_code == 200
-    except:
-        return False
+# ===================================================================
+# YARDIMCI FONKSIYONLAR
+# ===================================================================
 
-
-def get_quick_stats() -> Dict:
-    """Get quick statistics."""
-    stats = api_request("GET", "/progress/statistics")
-    if stats:
-        return stats
+def get_statistics() -> dict:
+    """Ilerleme istatistiklerini API'den al."""
+    data = api_get("/progress/statistics")
+    if data:
+        return data
     return {
         "total_questions": 0,
         "overall_accuracy": 0,
         "best_streak": 0,
-        "average_mastery": 0.5,
+        "average_mastery": 0.0,
         "topics_practiced": 0,
     }
 
 
-def get_recommendations() -> List[Dict]:
-    """Get topic recommendations."""
-    result = api_request("GET", "/progress/recommendations")
-    if result:
-        return result[:3]
+def get_recommendations() -> list:
+    """Konu onerilerini API'den al."""
+    data = api_get("/progress/recommendations")
+    if data:
+        return data[:3]
     return [
-        {"topic": "arithmetic", "current_mastery": 0.5, "reason": "Start with the basics"},
-        {"topic": "fractions", "current_mastery": 0.5, "reason": "Build on arithmetic skills"},
-        {"topic": "algebra", "current_mastery": 0.5, "reason": "Essential for higher math"},
+        {"topic": "arithmetic", "topic_name": "Aritmetik", "current_mastery": 0.45, "reason": "Temel islemlerle baslayarak gucllu bir temel olusuturun"},
+        {"topic": "fractions", "topic_name": "Kesirler", "current_mastery": 0.30, "reason": "Aritmetik becerilerinizi kesirlerle gelistirin"},
+        {"topic": "algebra", "topic_name": "Cebir", "current_mastery": 0.20, "reason": "Ileri matematik icin vazgecilmez bir konu"},
     ]
 
 
-def render_hero_section():
-    """Render the hero/welcome section."""
-    col1, col2 = st.columns([2, 1])
-
-    with col1:
-        st.markdown("""
-        # Welcome to Adaptive Math Learning
-
-        **Master mathematics at your own pace** with our intelligent learning system.
-
-        Our adaptive platform:
-        - Generates questions tailored to your skill level
-        - Provides instant feedback and step-by-step explanations
-        - Tracks your progress and adapts difficulty automatically
-        - Covers topics from basic arithmetic to advanced algebra
-        """)
-
-        col_a, col_b, col_c = st.columns(3)
-        with col_a:
-            if st.button("Start Practicing", type="primary", use_container_width=True):
-                st.switch_page("pages/practice.py")
-        with col_b:
-            if st.button("Browse Topics", use_container_width=True):
-                st.switch_page("pages/topics.py")
-        with col_c:
-            if st.button("View Progress", use_container_width=True):
-                st.switch_page("pages/progress.py")
-
-    with col2:
-        st.markdown("""
-        ### Quick Start Guide
-
-        1. **Choose a topic** from our curriculum
-        2. **Practice** with adaptive questions
-        3. **Get feedback** on every answer
-        4. **Track progress** as you improve
-        """)
-
-
-def render_stats_section(stats: Dict):
-    """Render the statistics section."""
-    st.markdown("---")
-    st.markdown("### Your Learning Journey")
-
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    with col1:
-        st.metric(
-            "Questions Solved",
-            stats.get("total_questions", 0),
-            help="Total questions attempted"
-        )
-
-    with col2:
-        accuracy = stats.get("overall_accuracy", 0)
-        st.metric(
-            "Accuracy",
-            f"{accuracy:.0%}",
-            help="Percentage of correct answers"
-        )
-
-    with col3:
-        st.metric(
-            "Best Streak",
-            stats.get("best_streak", 0),
-            help="Longest streak of correct answers"
-        )
-
-    with col4:
-        mastery = stats.get("average_mastery", 0.5)
-        st.metric(
-            "Overall Mastery",
-            f"{mastery:.0%}",
-            help="Average mastery across all topics"
-        )
-
-    with col5:
-        st.metric(
-            "Topics Practiced",
-            stats.get("topics_practiced", 0),
-            help="Number of topics you've practiced"
-        )
-
-
-def render_recommendations_section(recommendations: List[Dict]):
-    """Render topic recommendations."""
-    st.markdown("---")
-    st.markdown("### Recommended for You")
-
-    if not recommendations:
-        st.info("Complete some practice sessions to get personalized recommendations!")
-        return
-
-    cols = st.columns(len(recommendations))
-
-    for i, (col, rec) in enumerate(zip(cols, recommendations)):
-        with col:
-            topic = rec.get("topic", rec.get("topic_slug", "Unknown"))
-            mastery = rec.get("current_mastery", 0.5)
-            reason = rec.get("reason", "Recommended for practice")
-
-            st.markdown(f"#### {topic.title()}")
-            st.progress(mastery)
-            st.caption(f"Mastery: {mastery:.0%}")
-            st.caption(reason)
-
-            if st.button(f"Practice {topic.title()}", key=f"rec_{i}", use_container_width=True):
-                st.session_state.selected_topic = topic
-                st.switch_page("pages/practice.py")
-
-
-def render_topics_preview():
-    """Render a preview of available topics."""
-    st.markdown("---")
-    st.markdown("### Available Topics")
-
-    topics = [
-        ("Arithmetic", "Basic operations: +, -, *, /", "Grades 1-6"),
-        ("Fractions", "Add, subtract, multiply, divide fractions", "Grades 3-8"),
-        ("Percentages", "Percent calculations and applications", "Grades 5-9"),
-        ("Algebra", "Equations and expressions", "Grades 6-12"),
-        ("Geometry", "Area, perimeter, volume", "Grades 3-12"),
-        ("Ratios", "Ratios and proportions", "Grades 5-9"),
+def get_topics() -> list:
+    """Mevcut konulari API'den al."""
+    data = api_get("/topics")
+    if data:
+        # API bir liste veya dict dondurebilir
+        if isinstance(data, dict):
+            return data.get("topics", [])
+        return data
+    # Varsayilan konu listesi
+    return [
+        {"name": "Aritmetik", "slug": "arithmetic", "description": "Temel islemler: toplama, cikarma, carpma, bolme", "grade_range_start": 1, "grade_range_end": 6},
+        {"name": "Kesirler", "slug": "fractions", "description": "Kesir islemleri", "grade_range_start": 3, "grade_range_end": 8},
+        {"name": "Yuzdeler", "slug": "percentages", "description": "Yuzde hesaplamalari", "grade_range_start": 5, "grade_range_end": 9},
+        {"name": "Cebir", "slug": "algebra", "description": "Denklemler ve ifadeler", "grade_range_start": 6, "grade_range_end": 12},
+        {"name": "Geometri", "slug": "geometry", "description": "Alan, cevre, hacim hesaplamalari", "grade_range_start": 3, "grade_range_end": 12},
+        {"name": "Oranlar", "slug": "ratios", "description": "Oran ve orantilar", "grade_range_start": 5, "grade_range_end": 9},
+        {"name": "Uslu Sayilar", "slug": "exponents", "description": "Kuvvetler, kokler, us kurallari", "grade_range_start": 6, "grade_range_end": 10},
+        {"name": "Istatistik", "slug": "statistics", "description": "Ortalama, medyan, mod, olasilik", "grade_range_start": 5, "grade_range_end": 9},
+        {"name": "Sayi Teorisi", "slug": "number_theory", "description": "Asal sayilar, EBOB, EKOK", "grade_range_start": 4, "grade_range_end": 8},
+        {"name": "Denklem Sistemleri", "slug": "systems_of_equations", "description": "Cok bilinmeyenli denklemler", "grade_range_start": 7, "grade_range_end": 11},
+        {"name": "Esitsizlikler", "slug": "inequalities", "description": "Dogrusal ve birlesik esitsizlikler", "grade_range_start": 7, "grade_range_end": 11},
+        {"name": "Fonksiyonlar", "slug": "functions", "description": "Dogrusal, ikinci derece fonksiyonlar", "grade_range_start": 8, "grade_range_end": 12},
+        {"name": "Trigonometri", "slug": "trigonometry", "description": "Sinus, kosinus, tanjant", "grade_range_start": 9, "grade_range_end": 12},
+        {"name": "Polinomlar", "slug": "polynomials", "description": "Polinom islemleri ve carpanlara ayirma", "grade_range_start": 8, "grade_range_end": 11},
+        {"name": "Kumeler ve Mantik", "slug": "sets_and_logic", "description": "Kume islemleri, Venn semalari", "grade_range_start": 6, "grade_range_end": 10},
+        {"name": "Analitik Geometri", "slug": "coordinate_geometry", "description": "Uzaklik, egim, dogru denklemleri", "grade_range_start": 7, "grade_range_end": 11},
     ]
 
-    cols = st.columns(3)
-    for i, (name, desc, grades) in enumerate(topics):
-        with cols[i % 3]:
-            with st.container():
-                st.markdown(f"**{name}**")
-                st.caption(desc)
-                st.caption(grades)
+
+# Turkce konu isimleri eslestirmesi
+TOPIC_NAME_TR = {
+    "arithmetic": "Aritmetik",
+    "fractions": "Kesirler",
+    "percentages": "Yuzdeler",
+    "algebra": "Cebir",
+    "geometry": "Geometri",
+    "ratios": "Oranlar",
+    "exponents": "Uslu Sayilar",
+    "statistics": "Istatistik",
+    "number_theory": "Sayi Teorisi",
+    "systems_of_equations": "Denklem Sistemleri",
+    "inequalities": "Esitsizlikler",
+    "functions": "Fonksiyonlar",
+    "trigonometry": "Trigonometri",
+    "polynomials": "Polinomlar",
+    "sets_and_logic": "Kumeler ve Mantik",
+    "coordinate_geometry": "Analitik Geometri",
+}
 
 
-def render_features_section():
-    """Render the features section."""
-    st.markdown("---")
-    st.markdown("### Why Adaptive Learning?")
+# ===================================================================
+# 1) HERO BOLUMU
+# ===================================================================
+st.markdown("""
+<div class="hero-card" style="display:flex; align-items:center; flex-wrap:wrap; padding:32px 36px;">
+    <div style="flex:2; min-width:300px;">
+        <div class="hero-badge">🚀 Yapay Zeka Destekli Ogrenme</div>
+        <div class="hero-title">Adaptif Matematik<br>Ogrenme Platformu</div>
+        <p class="hero-subtitle">
+            Hibrit yapay zeka ve deterministik soru uretim motoru ile
+            kisisellestirilmis matematik egitimi. Seviyenize uygun sorularla
+            pratik yapin, aninda geri bildirim alin ve ilerlemenizi takip edin.
+        </p>
+    </div>
+    <div style="flex:1; min-width:200px;" class="hero-visual">
+        <div class="hero-visual-icon">🧮</div>
+        <div class="hero-visual-text">16 Konu &bull; 80+ Alt Konu &bull; Sinirsiz Soru</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.markdown("""
-        #### Personalized Difficulty
-
-        Questions adapt to your skill level. Too easy? We'll challenge you more.
-        Struggling? We'll help build your foundation.
-        """)
-
-    with col2:
-        st.markdown("""
-        #### Instant Feedback
-
-        Get immediate feedback on every answer with detailed step-by-step
-        explanations to help you understand your mistakes.
-        """)
-
-    with col3:
-        st.markdown("""
-        #### Progress Tracking
-
-        Monitor your improvement over time. See your strengths, identify
-        areas for improvement, and celebrate your achievements.
-        """)
-
-
-def render_api_status(connected: bool):
-    """Render API connection status."""
-    if connected:
-        st.sidebar.success("Backend connected")
-    else:
-        st.sidebar.warning("Backend offline")
-        st.sidebar.caption("Some features may be limited")
-        st.sidebar.code("python run_backend.py", language="bash")
-
-
-def main():
-    """Main application."""
-    # Sidebar navigation
-    st.sidebar.title("Navigation")
-
-    if st.sidebar.button("Home", use_container_width=True):
-        st.rerun()
-
-    if st.sidebar.button("Practice", use_container_width=True):
+# Hizli eylem butonlari
+btn_col1, btn_col2, btn_col3, btn_spacer = st.columns([1, 1, 1, 2])
+with btn_col1:
+    if st.button("📝  Pratik Baslat", type="primary", use_container_width=True):
         st.switch_page("pages/practice.py")
-
-    if st.sidebar.button("Topics", use_container_width=True):
+with btn_col2:
+    if st.button("📚  Konulari Gor", use_container_width=True):
         st.switch_page("pages/topics.py")
-
-    if st.sidebar.button("Progress", use_container_width=True):
+with btn_col3:
+    if st.button("📊  Ilerlemeni Takip Et", use_container_width=True):
         st.switch_page("pages/progress.py")
 
-    st.sidebar.markdown("---")
+st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-    # API status
-    connected = check_api_connection()
-    render_api_status(connected)
+# ===================================================================
+# 2) ISTATISTIK SATIRLARI
+# ===================================================================
+section_header("📈 Ogrenme Istatistiklerin")
 
-    # Main content
-    render_hero_section()
+stats = get_statistics()
 
-    # Stats
-    stats = get_quick_stats()
-    render_stats_section(stats)
+s1, s2, s3, s4, s5 = st.columns(5)
+with s1:
+    stat_card(
+        value=stats.get("total_questions", 0),
+        label="Cozulen Soru",
+        icon="✏️",
+    )
+with s2:
+    accuracy = stats.get("overall_accuracy", 0)
+    accuracy_display = f"%{accuracy * 100:.0f}" if isinstance(accuracy, float) and accuracy <= 1 else f"%{accuracy:.0f}"
+    stat_card(
+        value=accuracy_display,
+        label="Dogruluk Orani",
+        icon="🎯",
+    )
+with s3:
+    stat_card(
+        value=stats.get("best_streak", 0),
+        label="En Iyi Seri",
+        icon="🔥",
+    )
+with s4:
+    mastery = stats.get("average_mastery", 0)
+    mastery_display = f"%{mastery * 100:.0f}" if isinstance(mastery, float) and mastery <= 1 else f"%{mastery:.0f}"
+    stat_card(
+        value=mastery_display,
+        label="Genel Hakimiyet",
+        icon="🏆",
+    )
+with s5:
+    stat_card(
+        value=stats.get("topics_practiced", 0),
+        label="Calisilan Konu",
+        icon="📚",
+    )
 
-    # Recommendations
-    recommendations = get_recommendations()
-    render_recommendations_section(recommendations)
+st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
-    # Topics preview
-    render_topics_preview()
+# ===================================================================
+# 3) ONERILEN KONULAR
+# ===================================================================
+section_header("💡 Senin Icin Oneriler")
 
-    # Features
-    render_features_section()
+recommendations = get_recommendations()
 
-    # Footer
-    st.markdown("---")
-    st.caption("Adaptive Mathematics Learning System - TOBB ETU BIL495/YAP495 Spring 2025")
+if recommendations:
+    rec_cols = st.columns(3)
+    for idx, rec in enumerate(recommendations[:3]):
+        with rec_cols[idx]:
+            topic_slug = rec.get("topic", rec.get("topic_slug", "arithmetic"))
+            topic_name = rec.get("topic_name", TOPIC_NAME_TR.get(topic_slug, topic_slug.replace("_", " ").title()))
+            mastery_val = rec.get("current_mastery", 0.5)
+            reason = rec.get("reason", "Pratik yapmaniz onerilir")
+            color = get_topic_color(topic_slug)
 
+            st.markdown(f"""
+            <div class="recommendation-card">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                    <div style="width:10px; height:10px; border-radius:50%; background:{color};"></div>
+                    <div class="rec-topic-name">{topic_name}</div>
+                </div>
+                <div class="rec-reason">{reason}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-if __name__ == "__main__":
-    main()
+            progress_bar(mastery_val, f"Hakimiyet")
+
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+            if st.button(f"🎯 Pratik Yap", key=f"rec_practice_{idx}", use_container_width=True):
+                st.session_state.selected_topic = topic_slug
+                st.switch_page("pages/practice.py")
+else:
+    st.info("Kisisellestirilmis oneriler almak icin birkac pratik oturumu tamamlayin!")
+
+st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+
+# ===================================================================
+# 4) PLATFORM OZELLIKLERI (3x3 Grid)
+# ===================================================================
+section_header("🚀 Platform Ozellikleri")
+
+features = [
+    ("🎯", "Adaptif Zorluk",
+     "Bayesian Bilgi Takibi (BKT) ile seviyenize gore dinamik olarak ayarlanan zorluk sistemi."),
+    ("⚡", "Aninda Geri Bildirim",
+     "Her cevabinizdan sonra detayli aciklama ve adim adim cozum rehberi."),
+    ("📊", "BKT ile Hakimiyet Takibi",
+     "Bayesian Knowledge Tracing algoritmasi ile konu bazli hakimiyet analizi."),
+    ("🤖", "AI Hikaye Sorulari",
+     "Yapay zeka ile uretilen hikaye tabanli sorularla gercek hayat uygulamalari."),
+    ("🏆", "Oyunlastirma",
+     "Rozetler, liderlik tablosu, gunluk gorevler ve seri takibi ile motivasyon."),
+    ("🔄", "Aralikli Tekrar",
+     "Bilimsel aralikli tekrar algoritmasi ile uzun sureli hafiza olusturma."),
+    ("📋", "Sinav Hazirlik",
+     "LGS ve YKS formatinda deneme sinavlari ve detayli performans analizi."),
+    ("👥", "Sosyal Yarisma",
+     "Arkadaslarinizla yarisma, takim kurun ve birlikte ogrenin."),
+    ("🌍", "Coklu Dil Destegi",
+     "Turkce ve Ingilizce dil destegiyle tum ogrenciler icin erisebilir platform."),
+]
+
+# 3 satir x 3 sutun
+for row_start in range(0, 9, 3):
+    cols = st.columns(3)
+    for col_idx, col in enumerate(cols):
+        feat_idx = row_start + col_idx
+        if feat_idx < len(features):
+            icon, title, desc = features[feat_idx]
+            with col:
+                feature_card(icon, title, desc)
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+
+st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+# ===================================================================
+# 5) MEVCUT KONULAR
+# ===================================================================
+section_header("📚 Mevcut Konular")
+
+st.markdown("""
+<p style="color:#666; margin-bottom:18px; font-size:0.95em;">
+    Platformda 16 ana konu ve 80'den fazla alt konu bulunmaktadir.
+    Bir konuya tiklayarak pratik yapmaya baslayabilirsiniz.
+</p>
+""", unsafe_allow_html=True)
+
+topics = get_topics()
+
+# 4 sutunluk grid
+COLS_PER_ROW = 4
+for row_start in range(0, len(topics), COLS_PER_ROW):
+    row_topics = topics[row_start:row_start + COLS_PER_ROW]
+    cols = st.columns(COLS_PER_ROW)
+    for col_idx, col in enumerate(cols):
+        if col_idx < len(row_topics):
+            t = row_topics[col_idx]
+            slug = t.get("slug", "")
+            name = TOPIC_NAME_TR.get(slug, t.get("name", slug))
+            desc = t.get("description", "")
+            grade_start = t.get("grade_range_start", "?")
+            grade_end = t.get("grade_range_end", "?")
+            color = get_topic_color(slug)
+
+            with col:
+                st.markdown(f"""
+                <div class="topic-grid-card" style="background: linear-gradient(135deg, {color} 0%, {color}CC 100%);">
+                    <div class="topic-grid-name">{name}</div>
+                    <div class="topic-grid-desc">{desc}</div>
+                    <div class="topic-grid-grade">Sinif {grade_start}-{grade_end}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                if st.button(f"Pratik Yap", key=f"topic_{slug}", use_container_width=True):
+                    st.session_state.selected_topic = slug
+                    st.switch_page("pages/practice.py")
+
+st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+
+# ===================================================================
+# 6) ALT BILGI (FOOTER)
+# ===================================================================
+st.markdown("""
+<div class="app-footer">
+    <strong>TOBB ETU</strong> &mdash; BIL495 / YAP495 Bahar 2025<br>
+    <span style="font-size:0.8em; color:#ccc;">Adaptif Matematik Ogrenme Platformu v1.0</span>
+</div>
+""", unsafe_allow_html=True)
