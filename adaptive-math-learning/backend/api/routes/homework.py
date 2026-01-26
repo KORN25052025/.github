@@ -21,14 +21,11 @@ class CreateHomeworkRequest(BaseModel):
     topics: List[str]
     question_count: int = 10
     due_date: Optional[str] = None
-    title: Optional[str] = None
+    title: str = "Odev"
 
 class SubmitHomeworkRequest(BaseModel):
     student_id: str
-    answers: Dict[str, str]
-
-class GradeHomeworkRequest(BaseModel):
-    teacher_id: str
+    answers: List[Dict[str, Any]]
 
 class SetGoalRequest(BaseModel):
     parent_id: str
@@ -42,15 +39,29 @@ class SetGoalRequest(BaseModel):
 async def create_homework(req: CreateHomeworkRequest):
     """Odev olustur."""
     try:
+        from datetime import timedelta
+        if req.due_date:
+            due_dt = datetime.fromisoformat(req.due_date)
+        else:
+            due_dt = datetime.utcnow() + timedelta(days=7)
         hw = homework_service.create_homework(
             teacher_id=req.teacher_id,
             class_id=req.class_id,
             topics=req.topics,
             question_count=req.question_count,
-            due_date=req.due_date,
+            due_date=due_dt,
             title=req.title,
         )
-        return hw
+        return {
+            "homework_id": hw.homework_id,
+            "title": hw.title,
+            "topics": hw.topics,
+            "question_count": hw.question_count,
+            "due_date": hw.due_date.isoformat(),
+            "status": hw.status.value,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -86,12 +97,11 @@ async def submit_homework(homework_id: str, req: SubmitHomeworkRequest):
 
 
 @router.post("/{homework_id}/grade")
-async def grade_homework(homework_id: str, req: GradeHomeworkRequest):
+async def grade_homework(homework_id: str):
     """Odevi notlandir."""
     try:
         result = homework_service.grade_homework(
             homework_id=homework_id,
-            teacher_id=req.teacher_id,
         )
         return result
     except KeyError:
@@ -104,7 +114,7 @@ async def grade_homework(homework_id: str, req: GradeHomeworkRequest):
 async def get_student_homework_list(student_id: str):
     """Ogrencinin odevlerini listele."""
     try:
-        homeworks = homework_service.get_student_homeworks(student_id)
+        homeworks = homework_service.get_student_homework_list(student_id)
         return homeworks
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -14,29 +14,29 @@ class StartSessionRequest(BaseModel):
     topic: Optional[str] = None
 
 class SendMessageRequest(BaseModel):
-    user_id: str
     message: str
 
 class ExplainQuestionRequest(BaseModel):
-    user_id: str
     question_data: Dict[str, Any]
+    user_answer: Optional[str] = None
+    grade_level: Optional[int] = None
 
 class ExplainErrorRequest(BaseModel):
-    user_id: str
     question_data: Dict[str, Any]
     user_answer: str
     correct_answer: str
+    grade_level: Optional[int] = None
 
 
 @router.post("/start")
 async def start_session(req: StartSessionRequest):
     """AI tutor oturumu baslat."""
     try:
-        session = ai_tutor_service.start_session(
+        session = await ai_tutor_service.start_session(
             user_id=req.user_id,
             topic=req.topic,
         )
-        return session
+        return session.to_dict()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -45,13 +45,12 @@ async def start_session(req: StartSessionRequest):
 async def send_message(session_id: str, req: SendMessageRequest):
     """AI tutora mesaj gonder."""
     try:
-        response = ai_tutor_service.send_message(
+        response = await ai_tutor_service.send_message(
             session_id=session_id,
-            user_id=req.user_id,
-            message=req.message,
+            user_message=req.message,
         )
-        return response
-    except KeyError:
+        return response.to_dict()
+    except ValueError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -61,11 +60,12 @@ async def send_message(session_id: str, req: SendMessageRequest):
 async def explain_question(req: ExplainQuestionRequest):
     """Soruyu acikla."""
     try:
-        explanation = ai_tutor_service.explain_question(
-            user_id=req.user_id,
+        explanation = await ai_tutor_service.explain_question(
             question_data=req.question_data,
+            user_answer=req.user_answer,
+            grade_level=req.grade_level,
         )
-        return explanation
+        return explanation.to_dict()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -74,13 +74,13 @@ async def explain_question(req: ExplainQuestionRequest):
 async def explain_error(req: ExplainErrorRequest):
     """Hatanin nedenini acikla."""
     try:
-        explanation = ai_tutor_service.explain_error(
-            user_id=req.user_id,
+        explanation = await ai_tutor_service.explain_error(
             question_data=req.question_data,
             user_answer=req.user_answer,
             correct_answer=req.correct_answer,
+            grade_level=req.grade_level,
         )
-        return explanation
+        return explanation.to_dict()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -91,7 +91,7 @@ async def get_session_history(session_id: str):
     try:
         history = ai_tutor_service.get_session_history(session_id)
         return history
-    except KeyError:
+    except ValueError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -101,9 +101,9 @@ async def get_session_history(session_id: str):
 async def end_session(session_id: str):
     """Oturumu sonlandir."""
     try:
-        result = ai_tutor_service.end_session(session_id)
-        return result
-    except KeyError:
+        result = await ai_tutor_service.end_session(session_id)
+        return result.to_dict()
+    except ValueError:
         raise HTTPException(status_code=404, detail="Oturum bulunamadi.")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -11,7 +11,6 @@ router = APIRouter(prefix="/srs", tags=["Spaced Repetition"])
 
 class RecordWrongAnswerRequest(BaseModel):
     user_id: str
-    question_id: str
     question_data: Dict[str, Any]
     user_answer: str
     correct_answer: str
@@ -28,12 +27,11 @@ async def record_wrong_answer(req: RecordWrongAnswerRequest):
     try:
         entry = spaced_repetition_service.record_wrong_answer(
             user_id=req.user_id,
-            question_id=req.question_id,
             question_data=req.question_data,
             user_answer=req.user_answer,
             correct_answer=req.correct_answer,
         )
-        return entry
+        return entry.to_dict()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -52,14 +50,18 @@ async def get_review_queue(user_id: str):
 async def submit_review(req: SubmitReviewRequest):
     """Tekrar sonucunu kaydet."""
     try:
+        is_correct = req.quality >= 3
         result = spaced_repetition_service.submit_review(
             user_id=req.user_id,
             question_id=req.question_id,
+            is_correct=is_correct,
             quality=req.quality,
         )
+        if result is None:
+            raise HTTPException(status_code=404, detail="Kayit bulunamadi.")
         return result
-    except KeyError:
-        raise HTTPException(status_code=404, detail="Kayit bulunamadi.")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -69,7 +71,7 @@ async def get_wrong_answer_notebook(user_id: str):
     """Yanlis soru defterini getir."""
     try:
         notebook = spaced_repetition_service.get_wrong_answer_notebook(user_id)
-        return {"notebook": notebook, "total": len(notebook)}
+        return notebook
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -76,7 +76,7 @@ async def join_duel(duel_id: str, req: JoinDuelRequest):
 async def submit_duel_answer(duel_id: str, req: DuelAnswerRequest):
     """Duello cevabi gonder."""
     try:
-        result = duel_service.submit_answer(
+        result = duel_service.submit_duel_answer(
             duel_id=duel_id,
             user_id=req.user_id,
             question_id=req.question_id,
@@ -135,7 +135,7 @@ async def join_tournament(tournament_id: str, req: JoinTournamentRequest):
 async def get_tournament_leaderboard(tournament_id: str):
     """Turnuva siralama tablosunu getir."""
     try:
-        leaderboard = tournament_service.get_leaderboard(tournament_id)
+        leaderboard = tournament_service.get_tournament_leaderboard(tournament_id)
         return leaderboard
     except KeyError:
         raise HTTPException(status_code=404, detail="Turnuva bulunamadi.")
@@ -147,7 +147,7 @@ async def get_tournament_leaderboard(tournament_id: str):
 async def send_friend_request(req: FriendRequestModel):
     """Arkadaslik istegi gonder."""
     try:
-        result = friend_service.send_request(
+        result = friend_service.send_friend_request(
             from_user_id=req.from_user_id,
             to_user_id=req.to_user_id,
         )
