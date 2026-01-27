@@ -8,8 +8,7 @@ from sqlalchemy.orm import Session
 from ..database import SessionLocal, get_db
 from ..services.question_service import QuestionService
 from ..services.answer_service import AnswerService
-from ..services.session_service import SessionService
-from ..services.mastery_service import MasteryService
+from ..services.question_service import SessionService, MasteryService
 
 
 def get_question_service(db: Session = None) -> QuestionService:

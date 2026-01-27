@@ -9,6 +9,7 @@ from .config import get_settings
 from .database import init_db
 from .api.routes import questions, answers, sessions, topics, progress, gamification, teacher, parent
 from .api.routes import exam_prep, diagnostic, spaced_repetition, ai_tutor, social, motivation, homework, accessibility
+from .api.routes import daily_challenges, hints
 
 settings = get_settings()
 
@@ -77,6 +78,8 @@ app.include_router(social.router, prefix="/api/v1", tags=["Social & Competition"
 app.include_router(motivation.router, prefix="/api/v1", tags=["Motivation & Content"])
 app.include_router(homework.router, prefix="/api/v1", tags=["Homework & Goals"])
 app.include_router(accessibility.router, prefix="/api/v1", tags=["Accessibility"])
+app.include_router(daily_challenges.router, prefix="/api/v1", tags=["Daily Challenges"])
+app.include_router(hints.router, prefix="/api/v1", tags=["Hints & Solutions"])
 
 
 if __name__ == "__main__":
