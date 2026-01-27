@@ -254,15 +254,22 @@ def render_sidebar(active_page: str = ""):
             ("Pratik Yap", "📝", "pages/practice"),
             ("Konular", "📚", "pages/topics"),
             ("Ilerleme", "📊", "pages/progress"),
+        ]
+
+        feature_items = [
             ("Oyunlastirma", "🏆", "pages/gamification"),
+            ("Gunluk Gorevler", "🎯", "pages/daily_challenges"),
             ("Motivasyon", "💡", "pages/motivation"),
             ("Sinav Hazirlik", "📋", "pages/exam_prep"),
+            ("AI Ders Arkadasi", "🤖", "pages/ai_tutor"),
+            ("Aralikli Tekrar", "🔄", "pages/spaced_repetition"),
             ("Sosyal", "👥", "pages/social"),
+            ("Odevler", "📓", "pages/homework"),
             ("Erisebilirlik", "♿", "pages/accessibility"),
         ]
 
         st.markdown("##### 📌 Ana Menuler")
-        for label, icon, page in nav_items[:4]:
+        for label, icon, page in nav_items:
             if st.button(f"{icon}  {label}", key=f"nav_{page}", use_container_width=True):
                 if page == "app":
                     st.switch_page("app.py")
@@ -271,7 +278,7 @@ def render_sidebar(active_page: str = ""):
 
         st.markdown("---")
         st.markdown("##### 🚀 Ozellikler")
-        for label, icon, page in nav_items[4:]:
+        for label, icon, page in feature_items:
             if st.button(f"{icon}  {label}", key=f"nav_{page}", use_container_width=True):
                 st.switch_page(f"{page}.py")
 

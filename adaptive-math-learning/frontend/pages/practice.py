@@ -322,6 +322,83 @@ def render_answer_input():
     return None
 
 
+def fetch_hints(question: Dict) -> Optional[Dict]:
+    """Fetch progressive hints for current question from Hints API."""
+    data = {
+        "question_type": question.get("topic", question.get("question_type", "arithmetic")),
+        "operation": question.get("subtopic", question.get("operation")),
+        "expression": question.get("expression", ""),
+        "difficulty_tier": int(question.get("difficulty_score", 0.5) * 3) + 1,
+    }
+    return api_request("POST", "/hints/get", data)
+
+
+def fetch_solution(question: Dict) -> Optional[Dict]:
+    """Fetch step-by-step solution from Hints API."""
+    data = {
+        "question_type": question.get("topic", question.get("question_type", "arithmetic")),
+        "operation": question.get("subtopic", question.get("operation")),
+        "expression": question.get("expression", ""),
+        "correct_answer": str(question.get("correct_answer", "")),
+    }
+    return api_request("POST", "/hints/solution", data)
+
+
+def render_hints_section(question: Dict):
+    """Render the hints panel for the current question."""
+    st.markdown("---")
+    col_h1, col_h2 = st.columns(2)
+
+    with col_h1:
+        if st.button("💡 Ipucu Al", use_container_width=True):
+            hints_data = fetch_hints(question)
+            if hints_data and hints_data.get("hints"):
+                st.session_state["_hints_data"] = hints_data["hints"]
+            else:
+                st.session_state["_hints_data"] = [
+                    {"level": 1, "text_tr": "Problemi dikkatli oku ve ne soruldugunu anla.", "xp_cost": 5},
+                    {"level": 2, "text_tr": "Islem sirasina dikkat et.", "xp_cost": 10},
+                    {"level": 3, "text_tr": "Adim adim coz, her adimi kontrol et.", "xp_cost": 20},
+                ]
+
+    with col_h2:
+        if st.button("📖 Cozumu Goster", use_container_width=True):
+            solution_data = fetch_solution(question)
+            if solution_data and solution_data.get("steps"):
+                st.session_state["_solution_data"] = solution_data
+            else:
+                st.session_state["_solution_data"] = {
+                    "steps": [
+                        {"step_number": 1, "description_tr": "Ifadeyi yaz", "expression": question.get("expression", "")},
+                        {"step_number": 2, "description_tr": "Islemi yap", "expression": f"= {question.get('correct_answer', '?')}"},
+                    ],
+                    "final_answer": str(question.get("correct_answer", "?")),
+                }
+
+    # Display hints if loaded
+    if st.session_state.get("_hints_data"):
+        hints = st.session_state["_hints_data"]
+        hint_level = st.select_slider(
+            "Ipucu Seviyesi",
+            options=[1, 2, 3],
+            value=1,
+            format_func=lambda x: {1: "Hafif (5 XP)", 2: "Orta (10 XP)", 3: "Guclu (20 XP)"}[x],
+        )
+        for h in hints:
+            if h.get("level", 1) <= hint_level:
+                st.info(f"💡 **Seviye {h.get('level', '?')}:** {h.get('text_tr', h.get('text', ''))}")
+
+    # Display solution if loaded
+    if st.session_state.get("_solution_data"):
+        sol = st.session_state["_solution_data"]
+        with st.expander("📖 Adim Adim Cozum", expanded=True):
+            for step in sol.get("steps", []):
+                st.markdown(f"**Adim {step.get('step_number', '')}:** {step.get('description_tr', step.get('description', ''))}")
+                if step.get("expression"):
+                    st.code(step["expression"])
+            st.success(f"**Sonuc:** {sol.get('final_answer', '?')}")
+
+
 def render_feedback(result: Dict):
     """Render answer feedback."""
     is_correct = result.get("is_correct", False)
@@ -453,6 +530,9 @@ def main():
     if st.session_state.current_question:
         question = st.session_state.current_question
         render_question(question)
+
+        # Hints section (available before and after answering)
+        render_hints_section(question)
 
         # Show last result if available
         if st.session_state.last_result:
