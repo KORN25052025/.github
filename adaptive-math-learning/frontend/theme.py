@@ -304,7 +304,7 @@ def render_sidebar(active_page: str = ""):
 def check_api() -> bool:
     """Check API connectivity."""
     try:
-        r = requests.get("http://localhost:8000/health", timeout=3)
+        r = requests.get(API_URL.replace("/api/v1", "/health"), timeout=3)
         return r.status_code == 200
     except:
         return False
