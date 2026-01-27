@@ -1,5 +1,6 @@
 """Homework, Goals, and Class Analytics API routes."""
 
+from dataclasses import asdict
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
@@ -11,6 +12,17 @@ from ...services.enhanced_parent_teacher_service import (
     goal_setting_service,
     class_analytics_service,
 )
+
+
+def _serialize_goal(goal) -> Dict[str, Any]:
+    """Serialize a LearningGoal dataclass to JSON-safe dict."""
+    d = asdict(goal)
+    for k, v in d.items():
+        if isinstance(v, datetime):
+            d[k] = v.isoformat()
+        elif hasattr(v, "value"):
+            d[k] = v.value
+    return d
 
 router = APIRouter(prefix="/homework", tags=["Homework & Goals"])
 
@@ -134,7 +146,7 @@ async def set_goal(req: SetGoalRequest):
             target_value=req.target_value,
             deadline=deadline,
         )
-        return goal.to_dict()
+        return _serialize_goal(goal)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -146,7 +158,7 @@ async def get_goals(child_id: str):
     """Cocugun hedeflerini getir."""
     try:
         goals = goal_setting_service.get_goals(child_id)
-        return [g.to_dict() for g in goals]
+        return [_serialize_goal(g) for g in goals]
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
