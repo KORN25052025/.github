@@ -16,10 +16,11 @@ st.set_page_config(
     layout="wide",
 )
 
+import os
 try:
     from frontend.theme import API_URL
 except ImportError:
-    API_URL = "http://localhost:8000/api/v1"
+    API_URL = os.environ.get("API_URL", "http://localhost:8000/api/v1")
 
 
 def api_request(method: str, endpoint: str, data: dict = None) -> Optional[dict]:

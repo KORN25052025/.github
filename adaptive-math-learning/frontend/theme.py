@@ -5,10 +5,12 @@ Provides a consistent, modern Turkish UI across all pages.
 
 import streamlit as st
 import requests
+import os
 from typing import Optional, Dict, Any, List
 
 
-API_URL = "http://localhost:8000/api/v1"
+# API URL from environment variable (allows configuration per-machine)
+API_URL = os.environ.get("API_URL", "http://localhost:8000/api/v1")
 
 
 def apply_theme():
