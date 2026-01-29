@@ -81,13 +81,13 @@ Gereksinimler:
 
 Sadece hikaye problemini yaz, baska bir sey yazma."""
 
-    def __init__(self, api_key: Optional[str] = None, provider: str = "claude"):
+    def __init__(self, api_key: Optional[str] = None, provider: str = "gemini"):
         """
         Initialize story generator.
 
         Args:
-            api_key: API key (Anthropic or OpenAI based on provider)
-            provider: LLM provider to use ("claude" or "openai")
+            api_key: API key for the selected provider
+            provider: LLM provider to use ("gemini", "claude", or "openai")
         """
         self.api_key = api_key
         self.provider = provider
@@ -95,7 +95,10 @@ Sadece hikaye problemini yaz, baska bir sey yazma."""
 
         if api_key:
             try:
-                if provider == "claude":
+                if provider == "gemini":
+                    from .providers.gemini_provider import GeminiProvider
+                    self._client = GeminiProvider(api_key=api_key)
+                elif provider == "claude":
                     from .providers.claude_provider import ClaudeProvider
                     self._client = ClaudeProvider(api_key=api_key)
                 else:
@@ -300,20 +303,40 @@ def generate_story_sync(
     answer: any,
     api_key: Optional[str] = None,
     theme: Optional[StoryTheme] = None,
-    provider: str = "claude"
+    provider: Optional[str] = None,
 ) -> GeneratedStory:
-    """Synchronous Turkish story generation."""
+    """Synchronous Turkish story generation.
+
+    Tries providers in order: Gemini (free) > Claude > OpenAI.
+    Uses the first provider that has an API key available.
+    """
     import asyncio
     import os
 
-    # Try to get API key from environment if not provided
-    if not api_key:
-        if provider == "claude":
-            api_key = os.getenv("ANTHROPIC_API_KEY")
-        else:
-            api_key = os.getenv("OPENAI_API_KEY")
+    # Auto-detect provider based on available API keys
+    if not api_key and not provider:
+        provider_keys = [
+            ("gemini", "GEMINI_API_KEY"),
+            ("claude", "ANTHROPIC_API_KEY"),
+            ("openai", "OPENAI_API_KEY"),
+        ]
+        for prov, env_var in provider_keys:
+            key = os.getenv(env_var)
+            if key:
+                api_key = key
+                provider = prov
+                break
+        if not provider:
+            provider = "gemini"
+    elif not api_key:
+        env_map = {
+            "gemini": "GEMINI_API_KEY",
+            "claude": "ANTHROPIC_API_KEY",
+            "openai": "OPENAI_API_KEY",
+        }
+        api_key = os.getenv(env_map.get(provider, ""), "")
 
-    generator = StoryGenerator(api_key, provider=provider)
+    generator = StoryGenerator(api_key, provider=provider or "gemini")
     context = StoryContext(
         theme=theme or random.choice(list(StoryTheme)),
         character_name=random.choice(TURKISH_NAMES),

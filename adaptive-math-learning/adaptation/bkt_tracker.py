@@ -313,7 +313,13 @@ class BKTTracker:
 
         Maps difficulty tier to a continuous value for compatibility
         with existing question generation.
+
+        New users (no practice history) start at a moderate difficulty
+        so they get a variety of operations, not just the easiest ones.
         """
+        key = self._make_key(topic_id, subtopic_id)
+        has_history = key in self._records and self._records[key].attempts > 0
+
         tier = self.get_difficulty_tier(topic_id, subtopic_id)
         mastery = self.get_mastery(topic_id, subtopic_id)
 
@@ -338,7 +344,14 @@ class BKTTracker:
 
         position = max(0, min(1, position))
 
-        return low + position * (high - low)
+        difficulty = low + position * (high - low)
+
+        # For new users with no history, start at a moderate difficulty
+        # so they get a variety of operations (not locked into addition-only)
+        if not has_history:
+            difficulty = max(difficulty, 0.3)
+
+        return difficulty
 
     def predict_correct_probability(
         self,

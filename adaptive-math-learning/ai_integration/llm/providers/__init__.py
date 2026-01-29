@@ -2,11 +2,13 @@
 LLM Provider modules.
 
 Provides integration with various LLM providers:
-- Claude (Anthropic) - Primary provider for Turkish story generation
-- OpenAI - Fallback provider
+- Gemini (Google) - Primary provider (free tier available)
+- Claude (Anthropic) - Alternative provider
+- OpenAI - Alternative provider
 """
 
 from .claude_provider import ClaudeProvider
 from .openai_provider import OpenAIProvider
+from .gemini_provider import GeminiProvider
 
-__all__ = ["ClaudeProvider", "OpenAIProvider"]
+__all__ = ["ClaudeProvider", "OpenAIProvider", "GeminiProvider"]
