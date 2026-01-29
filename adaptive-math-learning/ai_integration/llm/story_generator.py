@@ -1,10 +1,11 @@
 """
-Turkish Story Generation using Anthropic Claude API.
+TYT Yeni Nesil Soru Üretici (Turkish New-Generation Question Generator).
 
-Transforms abstract mathematical expressions into engaging Turkish word problems
-while preserving mathematical correctness.
+Transforms abstract mathematical expressions into TYT-style "yeni nesil"
+(new generation) questions — real-life scenario-based, analytical thinking
+problems modeled after ÖSYM university entrance exam format.
 
-Primary LLM: Claude 3.5 Sonnet (Anthropic)
+Primary LLM: Gemini (Google)
 Fallback: Template-based generation
 """
 
@@ -15,16 +16,19 @@ import random
 
 
 class StoryTheme(str, Enum):
-    """Themes for Turkish story generation."""
-    ALISVERIS = "alisveris"        # Shopping
-    SPOR = "spor"                   # Sports
-    YEMEK = "yemek"                 # Cooking/Food
-    SEYAHAT = "seyahat"            # Travel
-    DOGA = "doga"                   # Nature
-    HAYVANLAR = "hayvanlar"        # Animals
-    OYUNLAR = "oyunlar"            # Games
-    OKUL = "okul"                   # School
-    GUNLUK_HAYAT = "gunluk_hayat"  # Daily life
+    """Themes for TYT yeni nesil story generation."""
+    ALISVERIS = "alisveris"        # Shopping / Economy
+    SPOR = "spor"                   # Sports / Statistics
+    YEMEK = "yemek"                 # Cooking / Ratios
+    SEYAHAT = "seyahat"            # Travel / Distance-Time
+    DOGA = "doga"                   # Nature / Environment
+    HAYVANLAR = "hayvanlar"        # Animals / Biology data
+    OYUNLAR = "oyunlar"            # Games / Probability
+    OKUL = "okul"                   # School / Education stats
+    GUNLUK_HAYAT = "gunluk_hayat"  # Daily life / Practical math
+    EKONOMI = "ekonomi"            # Finance / Percentages
+    BILIM = "bilim"                # Science / Measurement
+    TEKNOLOJI = "teknoloji"        # Technology / Data
 
 
 @dataclass
@@ -61,25 +65,31 @@ class StoryGenerator:
     Uses Anthropic Claude API for story generation with fallback to templates.
     """
 
-    TURKISH_STORY_PROMPT = """Sen {grade_level}. sinif ogrencisi icin Turkce matematik problemi olusturuyorsun.
+    TURKISH_STORY_PROMPT = """Sen ÖSYM tarzında TYT "yeni nesil" matematik sorusu hazırlayan bir eğitim uzmanısın.
 
-Bu matematiksel ifadeyi eglenceli bir hikaye problemine donustur:
+Aşağıdaki matematiksel ifadeyi gerçek hayat senaryosuna dayalı, analitik düşünme gerektiren bir TYT yeni nesil sorusuna dönüştür.
 
-IFADE: {expression}
-DOGRU CEVAP: {answer}
+İFADE: {expression}
+DOĞRU CEVAP: {answer}
 TEMA: {theme}
 KARAKTER: {character}
 
-Gereksinimler:
-1. Hikaye yasa uygun ve ilgi cekici olmali
-2. Tum sayilar orijinal ifadeyle AYNI olmali
-3. Soru acik ve cevaplanabilir olmali
-4. {grade_level}. sinif icin uygun kelime hazinesi kullan
-5. Hikaye 2-3 cumle ile sinirli olsun
-6. Cevabi hikayede verme
-7. Net bir soru ile bitir
+TYT YENİ NESİL SORU KURALLARI:
+1. Gerçek hayattan bir senaryo kur (alışveriş, iş, bilim, spor, seyahat, üretim, veri analizi vb.)
+2. Soruyu bir bağlam/durum içinde sun — düz "hesapla" deme
+3. Öğrencinin bilgiyi yorumlaması, analiz etmesi veya çıkarım yapması gereksin
+4. Mümkünse tablo, liste veya karşılaştırma formatı kullan (metin içinde)
+5. Tüm sayısal değerler orijinal ifadeyle BİREBİR AYNI olmalı — sayıları değiştirme
+6. Cevabı kesinlikle verme veya ima etme
+7. Soru net ve tek doğru cevaplı olmalı
+8. 3-5 cümle uzunluğunda, akıcı Türkçe ile yaz
+9. Soru "Buna göre..." veya "Bu durumda..." gibi analitik bir soru cümlesiyle bitsin
+10. {grade_level}. sınıf seviyesine uygun olsun
 
-Sadece hikaye problemini yaz, baska bir sey yazma."""
+ÖRNEK FORMAT:
+"{character}, hafta sonu markete gidip her biri 3 TL olan 5 paket süt almıştır. Kasada indirim kuponu kullanarak toplam tutardan 2 TL indirim almıştır. Buna göre, {character}'in kasada ödediği tutar kaç TL'dir?"
+
+Sadece soruyu yaz, başka açıklama ekleme."""
 
     def __init__(self, api_key: Optional[str] = None, provider: str = "gemini"):
         """
@@ -157,12 +167,12 @@ Sadece hikaye problemini yaz, baska bir sey yazma."""
             character=context.character_name or random.choice(TURKISH_NAMES),
         )
 
-        system_prompt = "Sen K-12 ogrencileri icin Turkce matematik kelime problemleri olusturan bir egitim asistanisin."
+        system_prompt = "Sen ÖSYM tarzında TYT yeni nesil matematik soruları hazırlayan deneyimli bir Türk matematik eğitimcisisin. Soruların gerçek hayat senaryolarına dayalı, analitik düşünme gerektiren ve çok adımlı çözüm içeren sorular olmalı."
 
         story_text = await self._client.generate(
             prompt=prompt,
             system_prompt=system_prompt,
-            max_tokens=300,
+            max_tokens=500,
             temperature=0.7,
         )
 
@@ -179,15 +189,18 @@ Sadece hikaye problemini yaz, baska bir sey yazma."""
     def _generate_visual_prompt(self, context: StoryContext) -> str:
         """Generate DALL-E 3 visual prompt."""
         theme_descriptions = {
-            StoryTheme.ALISVERIS: "a colorful Turkish market scene with fruits and vegetables",
-            StoryTheme.SPOR: "children playing sports in a sunny Turkish school yard",
-            StoryTheme.YEMEK: "a warm Turkish kitchen with traditional food",
-            StoryTheme.SEYAHAT: "a scenic Turkish landscape with a bus or train",
-            StoryTheme.DOGA: "beautiful Turkish nature with flowers and trees",
-            StoryTheme.HAYVANLAR: "cute farm animals in a Turkish countryside",
-            StoryTheme.OYUNLAR: "children playing traditional Turkish games",
-            StoryTheme.OKUL: "a bright and cheerful Turkish classroom",
-            StoryTheme.GUNLUK_HAYAT: "a typical day in a Turkish neighborhood",
+            StoryTheme.ALISVERIS: "a modern Turkish shopping scene with price tags and receipts",
+            StoryTheme.SPOR: "a Turkish sports stadium with scoreboards and statistics",
+            StoryTheme.YEMEK: "a Turkish kitchen with recipe cards and measuring tools",
+            StoryTheme.SEYAHAT: "a Turkish travel scene with maps, distances, and timetables",
+            StoryTheme.DOGA: "Turkish nature scene with scientific measurement tools",
+            StoryTheme.HAYVANLAR: "animals in a Turkish setting with data charts",
+            StoryTheme.OYUNLAR: "a game board with scores and probability elements",
+            StoryTheme.OKUL: "a Turkish classroom with graphs and charts on the board",
+            StoryTheme.GUNLUK_HAYAT: "a typical Turkish daily scene with practical math elements",
+            StoryTheme.EKONOMI: "a Turkish bank or finance scene with charts and percentages",
+            StoryTheme.BILIM: "a Turkish science lab with measurement instruments",
+            StoryTheme.TEKNOLOJI: "a modern Turkish tech workspace with data on screens",
         }
 
         theme_desc = theme_descriptions.get(context.theme, "a friendly educational scene")
@@ -231,68 +244,65 @@ Sadece hikaye problemini yaz, baska bir sey yazma."""
             a, b = parts[0].strip(), parts[1].strip()
             return self._subtraction_story(a, b, name, theme)
 
-        elif "x" in expr.lower() or "*" in expr:
-            parts = expr.replace("x", "*").replace("X", "*").split("*")
+        elif "×" in expr or "x" in expr.lower() or "*" in expr:
+            parts = expr.replace("×", "*").replace("x", "*").replace("X", "*").split("*")
             a, b = parts[0].strip(), parts[1].strip()
             return self._multiplication_story(a, b, name, theme)
 
-        elif "/" in expr or ":" in expr:
-            parts = expr.replace(":", "/").split("/")
+        elif "÷" in expr or "/" in expr or ":" in expr:
+            parts = expr.replace("÷", "/").replace(":", "/").split("/")
             a, b = parts[0].strip(), parts[1].strip()
             return self._division_story(a, b, name, theme)
 
-        # Fallback
-        return f"Bu problemi coz: {expression}"
+        # Fallback for fraction and other expressions
+        name2 = random.choice([n for n in TURKISH_NAMES if n != name])
+        return f"{name} ve {name2}, bir proje için şu matematiksel ifadeyi hesaplamaları gerekmektedir: {expression}. Buna göre, bu işlemin sonucu kaçtır?"
 
     def _addition_story(self, a: str, b: str, name: str, theme: StoryTheme) -> str:
-        """Generate Turkish addition story."""
+        """Generate TYT yeni nesil addition story."""
         templates = {
-            StoryTheme.ALISVERIS: f"{name} marketten {a} elma aldi, sonra {b} elma daha aldi. {name}'in toplam kac elmasi var?",
-            StoryTheme.SPOR: f"{name} ilk yarisinda {a} sayi yapti, ikinci yarisinda {b} sayi daha yapti. Toplam kac sayi yapti?",
-            StoryTheme.YEMEK: f"{name}'in {a} kurabiyesi vardi, {b} tane daha pisirdi. Simdi toplam kac kurabiyesi var?",
-            StoryTheme.HAYVANLAR: f"Agacta {a} kus vardi. {b} kus daha geldi. Simdi agacta kac kus var?",
-            StoryTheme.OYUNLAR: f"{name} birinci bolumde {a} puan topladi, ikinci bolumde {b} puan daha topladi. Toplam kac puan topladi?",
-            StoryTheme.OKUL: f"{name} dun {a} sayfa okudu, bugun {b} sayfa daha okudu. Toplam kac sayfa okudu?",
-            StoryTheme.GUNLUK_HAYAT: f"{name}'in {a} tane kalem var. Annesi {b} kalem daha aldi. Simdi toplam kac kalemi var?",
+            StoryTheme.ALISVERIS: f"{name}, bir kırtasiyeden {a} TL'lik defter ve {b} TL'lik kalem almıştır. Kasada nakit ödeme yapmıştır. Buna göre, {name}'in kasada ödediği toplam tutar kaç TL'dir?",
+            StoryTheme.SPOR: f"Bir basketbol turnuvasında {name}'in takımı ilk yarıda {a}, ikinci yarıda {b} sayı atmıştır. Buna göre, takımın maç sonunda toplam attığı sayı kaçtır?",
+            StoryTheme.YEMEK: f"{name}, bir tarife göre pasta yaparken ilk malzeme için {a} gram, ikinci malzeme için {b} gram şeker kullanmıştır. Buna göre, tarifin tamamı için kullanılan toplam şeker miktarı kaç gramdır?",
+            StoryTheme.SEYAHAT: f"{name}, sabah evden işe giderken {a} km, akşam işten eve dönerken farklı bir yoldan {b} km yol gitmiştir. Buna göre, {name}'in gün içinde toplam gittiği yol kaç km'dir?",
+            StoryTheme.OKUL: f"Bir sınıfta yapılan ankete göre {a} öğrenci fen bilimleri, {b} öğrenci matematik dersini en sevdiği ders olarak belirtmiştir. Bu iki dersi seçen öğrenci sayılarının toplamı kaçtır?",
+            StoryTheme.GUNLUK_HAYAT: f"{name}, kütüphaneden bu hafta {a} kitap, geçen hafta {b} kitap ödünç almıştır. Buna göre, {name}'in iki haftada ödünç aldığı toplam kitap sayısı kaçtır?",
         }
         return templates.get(theme, templates[StoryTheme.GUNLUK_HAYAT])
 
     def _subtraction_story(self, a: str, b: str, name: str, theme: StoryTheme) -> str:
-        """Generate Turkish subtraction story."""
+        """Generate TYT yeni nesil subtraction story."""
         templates = {
-            StoryTheme.ALISVERIS: f"{name}'in {a} lirasi vardi, {b} lira harcadi. Kac lirasi kaldi?",
-            StoryTheme.SPOR: f"A takimi {a} gol atti, B takimi {b} gol atti. A takimi kac gol farkla kazandi?",
-            StoryTheme.YEMEK: f"{name} {a} tane borek yapti, {b} tanesini arkadaslarina verdi. Kac borek kaldi?",
-            StoryTheme.HAYVANLAR: f"Havuzda {a} balik vardi. {b} balik yuzup gitti. Havuzda kac balik kaldi?",
-            StoryTheme.OYUNLAR: f"{name}'in oyunda {a} cani vardi, {b} can kaybetti. Kac cani kaldi?",
-            StoryTheme.OKUL: f"{name}'in {a} cikartmasi vardi, arkadasina {b} tane verdi. Kac cikartmasi kaldi?",
-            StoryTheme.GUNLUK_HAYAT: f"Kutuda {a} top vardi. {b} tanesi kayboldu. Kutuda kac top kaldi?",
+            StoryTheme.ALISVERIS: f"{name}'in bütçesinde {a} TL bulunmaktadır. Bir alışveriş merkezinde {b} TL tutarında harcama yapmıştır. Buna göre, {name}'in kalan bütçesi kaç TL'dir?",
+            StoryTheme.SPOR: f"Bir yüzme yarışmasında {name} {a} saniyede, rakibi ise {b} saniyede bitirmiştir. Buna göre, {name} rakibinden kaç saniye önce bitirmiştir?",
+            StoryTheme.YEMEK: f"Bir fırında sabah {a} adet ekmek üretilmiştir. Öğlene kadar {b} adedi satılmıştır. Buna göre, öğleden sonra fırında kalan ekmek sayısı kaçtır?",
+            StoryTheme.SEYAHAT: f"{name}, toplam {a} km uzunluğundaki bir yolculuğa çıkmıştır. Şu ana kadar {b} km yol almıştır. Buna göre, {name}'in kalan yol mesafesi kaç km'dir?",
+            StoryTheme.OKUL: f"Bir okul kütüphanesinde {a} kitap bulunmaktadır. Dönem başında öğrencilere {b} kitap dağıtılmıştır. Buna göre, kütüphanede kalan kitap sayısı kaçtır?",
+            StoryTheme.GUNLUK_HAYAT: f"Bir depoda {a} adet ürün stoklanmıştır. Gün içinde {b} adet ürün sevk edilmiştir. Buna göre, depoda kalan ürün sayısı kaçtır?",
         }
         return templates.get(theme, templates[StoryTheme.GUNLUK_HAYAT])
 
     def _multiplication_story(self, a: str, b: str, name: str, theme: StoryTheme) -> str:
-        """Generate Turkish multiplication story."""
+        """Generate TYT yeni nesil multiplication story."""
         templates = {
-            StoryTheme.ALISVERIS: f"{name} {a} paket kalem aldi. Her pakette {b} kalem var. Toplam kac kalem aldi?",
-            StoryTheme.SPOR: f"{a} takim var. Her takimda {b} oyuncu var. Toplam kac oyuncu var?",
-            StoryTheme.YEMEK: f"{name} {a} tepsi kurabiye yapti. Her tepside {b} kurabiye var. Toplam kac kurabiye var?",
-            StoryTheme.HAYVANLAR: f"{a} kus yuvasi var. Her yuvada {b} yumurta var. Toplam kac yumurta var?",
-            StoryTheme.OYUNLAR: f"{name} {a} bolum tamamladi. Her bolum {b} yildiz veriyor. Toplam kac yildiz kazandi?",
-            StoryTheme.OKUL: f"Sinifta {a} sira var. Her sirada {b} ogrenci oturuyor. Sinifta toplam kac ogrenci var?",
-            StoryTheme.GUNLUK_HAYAT: f"{name}'in {a} arkadasi var. Her arkadasina {b} sekerleme verdi. Toplam kac sekerleme verdi?",
+            StoryTheme.ALISVERIS: f"{name}, bir mağazadan tanesi {b} TL olan üründen {a} adet satın almıştır. Buna göre, {name}'in bu alışveriş için ödediği toplam tutar kaç TL'dir?",
+            StoryTheme.SPOR: f"Bir okulda {a} sınıf bulunmaktadır ve her sınıftan {b} öğrenci okul spor takımına seçilmiştir. Buna göre, spor takımındaki toplam öğrenci sayısı kaçtır?",
+            StoryTheme.YEMEK: f"{name}, bir organizasyon için {a} tepsi baklava sipariş etmiştir. Her tepside {b} dilim bulunmaktadır. Buna göre, organizasyon için hazırlanan toplam baklava dilimi sayısı kaçtır?",
+            StoryTheme.SEYAHAT: f"Bir tur otobüsü günde {a} sefer yapmaktadır. Her seferde {b} yolcu taşımaktadır. Buna göre, otobüsün bir günde taşıdığı toplam yolcu sayısı kaçtır?",
+            StoryTheme.OKUL: f"Bir okulda {a} şube vardır ve her şubede {b} öğrenci bulunmaktadır. Buna göre, okulun toplam öğrenci sayısı kaçtır?",
+            StoryTheme.GUNLUK_HAYAT: f"Bir apartmanda {a} kat bulunmakta olup her katta {b} daire vardır. Buna göre, apartmandaki toplam daire sayısı kaçtır?",
         }
         return templates.get(theme, templates[StoryTheme.GUNLUK_HAYAT])
 
     def _division_story(self, a: str, b: str, name: str, theme: StoryTheme) -> str:
-        """Generate Turkish division story."""
+        """Generate TYT yeni nesil division story."""
         templates = {
-            StoryTheme.ALISVERIS: f"{name}'in {a} sekeri var. {b} arkadasina esit paylastirmak istiyor. Her arkadasa kac seker duser?",
-            StoryTheme.SPOR: f"Antrenor {a} formasi {b} takima esit dagitmak istiyor. Her takima kac forma duser?",
-            StoryTheme.YEMEK: f"{name}'in {a} dilim pizzasi var. {b} kisiyle esit paylasacak. Her kisiye kac dilim duser?",
-            StoryTheme.HAYVANLAR: f"Ciftci {a} havcucu {b} tavsana esit dagitacak. Her tavsana kac havuc duser?",
-            StoryTheme.OYUNLAR: f"{name} {a} altin madeni {b} sandiga esit dagitiyor. Her sandikta kac altin olur?",
-            StoryTheme.OKUL: f"Ogretmen {a} kitabi {b} ogrenciye esit dagitacak. Her ogrenciye kac kitap duser?",
-            StoryTheme.GUNLUK_HAYAT: f"{name}'in {a} bilye var. {b} torbaya esit dagitmak istiyor. Her torbaya kac bilye koyar?",
+            StoryTheme.ALISVERIS: f"Bir mağaza, toplam {a} TL tutarındaki ürünleri {b} eşit taksitle satışa sunmuştur. Buna göre, her bir taksitin tutarı kaç TL'dir?",
+            StoryTheme.SPOR: f"Bir atletizm antrenörü, {a} metrelik koşu parkurunu {b} eşit etaba bölmüştür. Buna göre, her bir etabın uzunluğu kaç metredir?",
+            StoryTheme.YEMEK: f"{name}, {a} adet kurabiyeyi {b} kişiye eşit olarak dağıtacaktır. Buna göre, her kişiye kaç kurabiye düşmektedir?",
+            StoryTheme.SEYAHAT: f"Bir otobüs şirketi, {a} km'lik güzergâhı {b} eşit durağa bölmüştür. Buna göre, ardışık iki durak arasındaki mesafe kaç km'dir?",
+            StoryTheme.OKUL: f"Bir okul müdürü, {a} adet kitabı {b} sınıfa eşit olarak dağıtacaktır. Buna göre, her sınıfa kaç kitap düşmektedir?",
+            StoryTheme.GUNLUK_HAYAT: f"Bir çiftçi, {a} kg ürünü {b} eşit çuvala paylaştırmak istemektedir. Buna göre, her çuvala kaç kg ürün konulmalıdır?",
         }
         return templates.get(theme, templates[StoryTheme.GUNLUK_HAYAT])
 
