@@ -114,9 +114,24 @@ class AlgebraGenerator(QuestionGenerator):
         # Get grade configuration
         config = self._get_grade_config(grade_level)
 
+        # Map OperationType to equation_type if provided
+        if equation_type is None and operation is not None:
+            op_mapping = {
+                OperationType.LINEAR: "two_step",
+                OperationType.QUADRATIC: "quadratic",
+            }
+            equation_type = op_mapping.get(operation)
+
         # Select equation type
         if equation_type is None:
             equation_type = random.choice(config["types"])
+        elif equation_type not in config["types"]:
+            # User explicitly requested this type - upgrade grade config
+            for g in range(grade_level + 1, 11):
+                gc = self.GRADE_CONFIG.get(g)
+                if gc and equation_type in gc["types"]:
+                    config = gc
+                    break
 
         # Generate based on equation type
         if equation_type == "one_step":
