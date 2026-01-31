@@ -8,19 +8,11 @@ from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 import uuid
 
+from ..config import Settings
 from question_engine.base import QuestionType, OperationType, GeneratedQuestion
 from question_engine.registry import registry
 from adaptation.bkt_tracker import BKTTracker
 from adaptation.difficulty_mapper import DifficultyMapper, difficulty_mapper
-
-
-@dataclass
-class QuestionServiceConfig:
-    """Configuration for question service."""
-    enable_story_generation: bool = False
-    enable_visual_generation: bool = False
-    cache_questions: bool = True
-    default_difficulty: float = 0.5
 
 
 class QuestionService:
@@ -37,9 +29,9 @@ class QuestionService:
     # In-memory cache for question data (for answer validation)
     _question_cache: Dict[str, Dict[str, Any]] = {}
 
-    def __init__(self, db=None, config: Optional[QuestionServiceConfig] = None):
+    def __init__(self, settings: Settings, db=None):
         self.db = db
-        self.config = config or QuestionServiceConfig()
+        self.settings = settings
         self.mastery_tracker = BKTTracker()
         self.difficulty_mapper = difficulty_mapper
 
@@ -96,7 +88,7 @@ class QuestionService:
         )
 
         # Generate story if requested
-        if with_story and self.config.enable_story_generation:
+        if with_story and self.settings.enable_story_generation:
             question = self._add_story(question)
 
         # Cache for validation
@@ -189,6 +181,8 @@ class QuestionService:
             story = generate_story_sync(
                 expression=question.expression,
                 answer=question.correct_answer,
+                api_key=self.settings.gemini_api_key,
+                provider="gemini"
             )
 
             if story.success:

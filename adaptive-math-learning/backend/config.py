@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     anthropic_api_key: Optional[str] = None
     anthropic_model: str = "claude-3-5-sonnet-20241022"
 
+    # Gemini API
+    gemini_api_key: Optional[str] = None
+
     # OpenAI API (DALL-E 3 and fallback LLM)
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-3.5-turbo"
