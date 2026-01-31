@@ -7,6 +7,7 @@ Turkiye ulusal matematik sinavlarina yonelik kapsamli hazirlik platformu.
 
 import streamlit as st
 import time
+import html as html_module
 from typing import Optional, Dict, Any, List
 
 from theme import (
@@ -730,9 +731,9 @@ def render_exam_question(question: Dict, idx: int, total: int):
     st.markdown(f"""
     <div class="exam-question-card">
         <div class="exam-question-number">Soru {q_num}</div>
-        <span class="exam-question-topic">{topic_display}</span>
-        {f'<div style="color:#555; font-size:0.95em; margin-bottom:10px; line-height:1.5;">{story_text}</div>' if story_text else ''}
-        {f'<div class="exam-question-text">{question_text}</div>' if question_text else ''}
+        <span class="exam-question-topic">{html_module.escape(str(topic_display))}</span>
+        {f'<div style="color:#555; font-size:0.95em; margin-bottom:10px; line-height:1.5;">{html_module.escape(str(story_text))}</div>' if story_text else ''}
+        {f'<div class="exam-question-text">{html_module.escape(str(question_text))}</div>' if question_text else ''}
     </div>
     """, unsafe_allow_html=True)
 
@@ -1143,9 +1144,9 @@ def render_active_diagnostic():
     st.markdown(f"""
     <div class="exam-question-card">
         <div class="exam-question-number">Soru {answered + 1}</div>
-        {f'<span class="exam-question-topic">{topic_display}</span>' if topic_display else ''}
-        {f'<div style="color:#555; font-size:0.95em; margin-bottom:10px; line-height:1.5;">{story_text}</div>' if story_text else ''}
-        {f'<div class="exam-question-text">{question_text}</div>' if question_text else ''}
+        {f'<span class="exam-question-topic">{html_module.escape(str(topic_display))}</span>' if topic_display else ''}
+        {f'<div style="color:#555; font-size:0.95em; margin-bottom:10px; line-height:1.5;">{html_module.escape(str(story_text))}</div>' if story_text else ''}
+        {f'<div class="exam-question-text">{html_module.escape(str(question_text))}</div>' if question_text else ''}
     </div>
     """, unsafe_allow_html=True)
 

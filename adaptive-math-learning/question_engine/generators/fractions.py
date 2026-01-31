@@ -86,8 +86,17 @@ class FractionsGenerator(QuestionGenerator):
         config = self._get_grade_config(grade_level)
 
         # Select operation
-        if operation is None or operation not in config["ops"]:
+        if operation is None:
             operation = random.choice(config["ops"])
+        elif operation not in config["ops"]:
+            # User explicitly requested this operation - upgrade grade config
+            for g in range(grade_level + 1, 7):
+                gc = self.GRADE_CONFIG.get(g)
+                if gc and operation in gc["ops"]:
+                    config = gc
+                    break
+            else:
+                operation = random.choice(config["ops"])
 
         # Generate fractions based on operation
         if operation == OperationType.ADDITION:

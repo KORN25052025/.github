@@ -108,14 +108,43 @@ def get_topics() -> List[Dict]:
     ]
 
 
+# Map frontend subtopic slugs to backend operation values
+SUBTOPIC_TO_OPERATION = {
+    # Arithmetic
+    "addition": "addition",
+    "subtraction": "subtraction",
+    "multiplication": "multiplication",
+    "division": "division",
+    # Fractions (same operations)
+    # Percentages
+    "find_percentage": None,  # use default for topic
+    "find_whole": None,
+    "percentage_change": None,
+    # Algebra
+    "one_step": "linear",
+    "two_step": "linear",
+    "quadratic": "quadratic",
+    # Geometry
+    "area": "area",
+    "perimeter": "perimeter",
+    "volume": "volume",
+    # Ratios
+    "simplify": None,
+    "solve_proportion": None,
+    "word_problem": None,
+}
+
+
 def generate_question(topic: str, subtopic: str = None, difficulty: float = None, with_story: bool = False) -> Optional[Dict]:
     """Generate a new question."""
     data = {
-        "topic": topic,
+        "topic_slug": topic,
         "with_story": with_story,
     }
     if subtopic:
-        data["subtopic"] = subtopic
+        operation = SUBTOPIC_TO_OPERATION.get(subtopic, subtopic)
+        if operation:
+            data["operation"] = operation
     if difficulty is not None:
         data["difficulty"] = difficulty
 
@@ -399,7 +428,7 @@ def render_hints_section(question: Dict):
             for step in sol.get("steps", []):
                 st.markdown(f"**Adim {step.get('step_number', '')}:** {step.get('description_tr', step.get('description', ''))}")
                 if step.get("expression"):
-                    st.code(step["expression"])
+                    st.latex(format_latex(step["expression"]))
             st.success(f"**Sonuc:** {sol.get('final_answer', '?')}")
 
 

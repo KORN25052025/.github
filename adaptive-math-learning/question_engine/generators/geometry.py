@@ -150,10 +150,19 @@ class GeometryGenerator(QuestionGenerator):
         # Get configuration
         config = self._get_grade_config(grade_level)
 
+        # Map OperationType to GeometryOperation if provided
+        if geometry_operation is None and operation is not None:
+            op_mapping = {
+                OperationType.AREA: GeometryOperation.AREA,
+                OperationType.PERIMETER: GeometryOperation.PERIMETER,
+                OperationType.VOLUME: GeometryOperation.VOLUME,
+            }
+            geometry_operation = op_mapping.get(operation)
+
         # Select operation
         if geometry_operation is None:
             geometry_operation = random.choice(config["operations"])
-        else:
+        elif isinstance(geometry_operation, str):
             geometry_operation = GeometryOperation(geometry_operation)
 
         # Generate based on operation

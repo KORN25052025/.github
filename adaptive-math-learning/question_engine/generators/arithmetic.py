@@ -95,8 +95,12 @@ class ArithmeticGenerator(QuestionGenerator):
         if operation is None:
             operation = random.choice(config["ops"])
         elif operation not in config["ops"]:
-            # Fallback to available operations
-            operation = random.choice(config["ops"])
+            # User explicitly requested this operation - upgrade grade config
+            # to support it rather than ignoring the request
+            for g in range(grade_level + 1, 6):
+                if operation in self.GRADE_CONFIG[g]["ops"]:
+                    config = self._get_grade_config(g)
+                    break
 
         # Generate based on operation type
         if operation == OperationType.MIXED:

@@ -23,6 +23,65 @@ class OperationEnum(str, Enum):
     MULTIPLICATION = "multiplication"
     DIVISION = "division"
     MIXED = "mixed"
+    # Algebra operations
+    LINEAR = "linear"
+    QUADRATIC = "quadratic"
+    # Geometry operations
+    AREA = "area"
+    PERIMETER = "perimeter"
+    VOLUME = "volume"
+    # Exponents & Roots
+    EXPONENTIATION = "exponentiation"
+    SQUARE_ROOT = "square_root"
+    CUBE_ROOT = "cube_root"
+    SCIENTIFIC_NOTATION = "scientific_notation"
+    # Statistics & Probability
+    MEAN = "mean"
+    MEDIAN = "median"
+    MODE = "mode"
+    RANGE = "range"
+    PROBABILITY = "probability"
+    COMBINATION = "combination"
+    PERMUTATION = "permutation"
+    # Number Theory
+    PRIME = "prime"
+    GCD = "gcd"
+    LCM = "lcm"
+    DIVISIBILITY = "divisibility"
+    FACTORIZATION = "factorization"
+    # Systems of Equations
+    TWO_VARIABLE = "two_variable"
+    THREE_VARIABLE = "three_variable"
+    # Inequalities
+    LINEAR_INEQUALITY = "linear_inequality"
+    COMPOUND_INEQUALITY = "compound_inequality"
+    ABSOLUTE_VALUE_INEQUALITY = "absolute_value_inequality"
+    # Functions
+    LINEAR_FUNCTION = "linear_function"
+    QUADRATIC_FUNCTION = "quadratic_function"
+    DOMAIN_RANGE = "domain_range"
+    COMPOSITION = "composition"
+    INVERSE_FUNCTION = "inverse_function"
+    # Trigonometry
+    SINE = "sine"
+    COSINE = "cosine"
+    TANGENT = "tangent"
+    TRIG_EQUATION = "trig_equation"
+    # Polynomials
+    POLYNOMIAL_ADD = "polynomial_add"
+    POLYNOMIAL_MULTIPLY = "polynomial_multiply"
+    FACTORING = "factoring"
+    POLYNOMIAL_DIVISION = "polynomial_division"
+    # Sets & Logic
+    SET_UNION = "set_union"
+    SET_INTERSECTION = "set_intersection"
+    SET_DIFFERENCE = "set_difference"
+    VENN_DIAGRAM = "venn_diagram"
+    # Coordinate Geometry
+    DISTANCE = "distance"
+    MIDPOINT = "midpoint"
+    SLOPE = "slope"
+    LINE_EQUATION = "line_equation"
 
 
 class AnswerFormatEnum(str, Enum):
