@@ -8,7 +8,7 @@ Duello, turnuva, haftalik yarisma ve arkadaslik ozellikleri.
 import streamlit as st
 from datetime import datetime, timedelta
 
-from frontend.theme import apply_theme, render_sidebar, api_get, api_post, stat_card, section_header
+from theme import apply_theme, render_sidebar, api_get, api_post, stat_card, section_header
 
 # ---------------------------------------------------------------------------
 # Page Config

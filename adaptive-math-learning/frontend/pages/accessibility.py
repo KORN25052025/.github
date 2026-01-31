@@ -6,7 +6,7 @@ ozel egitim destegi saglayan kapsamli erisebilirlik sayfasi.
 """
 
 import streamlit as st
-from frontend.theme import apply_theme, render_sidebar, api_get, api_post, api_put, stat_card, section_header
+from theme import apply_theme, render_sidebar, api_get, api_post, api_put, stat_card, section_header
 
 # ---------------------------------------------------------------------------
 # Page configuration

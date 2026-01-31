@@ -6,7 +6,7 @@ Streamlit ana giris noktasi. Modern, gorsel acidan etkileyici bir kontrol paneli
 """
 
 import streamlit as st
-from frontend.theme import (
+from theme import (
     apply_theme,
     render_sidebar,
     api_get,

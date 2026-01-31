@@ -9,7 +9,7 @@ import streamlit as st
 import time
 from typing import Optional, Dict, Any, List
 
-from frontend.theme import (
+from theme import (
     apply_theme,
     render_sidebar,
     api_get,

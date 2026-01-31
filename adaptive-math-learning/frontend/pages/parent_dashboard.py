@@ -11,7 +11,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 
-from frontend.theme import (
+from theme import (
     apply_theme,
     render_sidebar,
     api_get,

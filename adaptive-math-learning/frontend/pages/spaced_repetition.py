@@ -8,7 +8,7 @@ kalici olarak ogren. Hata defteri, tekrar kuyrugu ve istatistikler.
 import streamlit as st
 from datetime import datetime, timedelta
 
-from frontend.theme import (
+from theme import (
     apply_theme,
     render_sidebar,
     api_get,

@@ -18,7 +18,7 @@ st.set_page_config(
 
 import os
 try:
-    from frontend.theme import API_URL
+    from theme import API_URL
 except ImportError:
     API_URL = os.environ.get("API_URL", "http://localhost:8000/api/v1")
 

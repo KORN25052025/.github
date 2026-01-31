@@ -8,7 +8,7 @@ tesvik eden oyunlastirilmis gorev merkezi. Turkce arayuz.
 import streamlit as st
 from typing import Dict, List, Any, Optional
 
-from frontend.theme import (
+from theme import (
     apply_theme,
     render_sidebar,
     api_get,
